@@ -1,0 +1,34 @@
+<svg width="640" height="150" viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="c1-plat" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="25%" stop-color="#e0faf5"/>
+      <stop offset="50%" stop-color="#55b5a8"/>
+      <stop offset="75%" stop-color="#1d5e55"/>
+      <stop offset="100%" stop-color="#0a2522"/>
+    </linearGradient>
+    <linearGradient id="c1-gem" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="20%" stop-color="#9fffee"/>
+      <stop offset="55%" stop-color="#00d7c0"/>
+      <stop offset="85%" stop-color="#07796d"/>
+      <stop offset="100%" stop-color="#013630"/>
+    </linearGradient>
+    <filter id="c1-shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#000000" flood-opacity="0.9"/>
+      <feDropShadow dx="0" dy="0" stdDeviation="10" flood-color="#00d7c0" flood-opacity="0.4"/>
+    </filter>
+    <linearGradient id="c1-spark" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#55ffd6"/>
+    </linearGradient>
+  </defs>
+  <g filter="url(#c1-shadow)">
+    <text x="50%" y="98" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="68" font-weight="950" letter-spacing="-0.03em" text-anchor="middle" fill="#011815" stroke="#000e0c" stroke-width="9" stroke-linejoin="round">머니그라운드</text>
+    <text x="50%" y="95" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="68" font-weight="950" letter-spacing="-0.03em" text-anchor="middle" fill="#05332d" stroke="#0e2a26" stroke-width="7" stroke-linejoin="round">머니그라운드</text>
+    <text x="50%" y="92" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="68" font-weight="950" letter-spacing="-0.03em" text-anchor="middle" fill="url(#c1-plat)" stroke="#1a5047" stroke-width="4.5" stroke-linejoin="round">머니그라운드</text>
+    <text x="50%" y="89" font-family="'Pretendard', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif" font-size="68" font-weight="950" letter-spacing="-0.03em" text-anchor="middle" fill="url(#c1-gem)">머니그라운드</text>
+  </g>
+  <polygon points="48,65 53,72 48,79 43,72" fill="url(#c1-spark)" opacity="0.95"/>
+  <polygon points="590,58 594,64 590,70 586,64" fill="url(#c1-spark)" opacity="0.95"/>
+</svg>
