@@ -1,0 +1,7 @@
+.game-card.has-provider-img > .provider-card-box {padding:0!important;aspect-ratio:4/3;}
+.provider-card-box > img {object-fit:contain;}
+.provider-card-box .play-layer button {display:flex;flex-direction:column;align-items:center;gap:8px;background:#071513!important;color:#effffb!important;max-width:90%;}
+.provider-card-box .play-layer button .provider-entry-logo {width:100px;height:32px;object-fit:contain;}
+.game-card.has-provider-img:focus-within .play-layer {opacity:1;}
+.game-card.has-provider-img > .provider-card-caption {display:flex;align-items:center;justify-content:center;min-height:36px;padding:8px 6px!important;border-top:1px solid #304140;background:linear-gradient(#1b2528,#0b1114);text-align:center;}
+.game-card.has-provider-img .provider-card-caption h3 {margin:0;color:#f2f7f6;font-size:12px;font-weight:800;line-height:1.4;word-break:keep-all;}

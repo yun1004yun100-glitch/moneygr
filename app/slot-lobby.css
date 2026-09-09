@@ -1,0 +1,23 @@
+.slot-lobby{max-width:820px;margin:auto;padding:12px;background:linear-gradient(135deg,#101917,#070c0d);border:1px solid #263b36;border-radius:12px;}
+.slot-provider-row{display:flex;gap:8px;align-items:flex-end}.slot-provider-select{flex:1;min-width:0;}.slot-provider-select>span{display:block;font-size:11px;color:#93aaa2;margin-bottom:6px;}
+.slot-provider-select select{box-sizing:border-box;width:100%;min-height:42px;padding:8px;color:#e8f6f0;background:#0b1011;border:1px solid #43524d;border-radius:5px;font-size:13px;}
+.slot-lobby .slot-provider-star{width:44px;min-height:42px;padding:4px;background:#192622;border:1px solid #46564f;border-radius:6px;color:#b5c8bf;font-size:27px;cursor:pointer;}.slot-lobby .slot-provider-star.saved{color:#ffd36d;border-color:#bc924b;}
+.slot-favorite-controls{display:flex;align-items:center;justify-content:space-between;margin:10px 0;font-size:11px;color:#9bb3a6;}
+.slot-lobby .slot-favorite-controls button,.slot-lobby .slot-provider-shortcuts button{padding:6px 9px;background:#10251f;border:1px solid #36584a;border-radius:5px;color:#d0e8da;font-size:11px;cursor:pointer;}
+.slot-lobby button[aria-pressed=true]{border-color:#eac568;color:#ffe099;}
+.slot-provider-shortcuts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.slot-search{display:flex;gap:0;margin:14px 0;}.slot-search input{box-sizing:border-box;min-width:0;flex:1;height:40px;padding:8px;border:1px solid #39433f;border-radius:4px 0 0 4px;background:#0c1110;color:#fff;font-size:12px;}
+.slot-search button{width:58px;background:#303c36;color:#e5eee8;border:1px solid #46534b;border-radius:0 4px 4px 0;font-size:12px;cursor:pointer;}
+.slot-list-heading{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:#bdd4c8;margin:12px 0;}.slot-list-heading span{color:#889f92;}
+.slot-example-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;}
+.slot-lobby .slot-example-card{min-width:0;padding:0;border:1px solid #6b896f;border-radius:9px;overflow:hidden;background:#0c1712;color:#fff;cursor:pointer;}.slot-example-card:hover{border-color:#f5d36b;}
+.slot-example-art{position:relative;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;background:radial-gradient(ellipse at 50% 40%,#ba8736,#31244e 70%);}
+.slot-example-art::before{content:'';position:absolute;inset:12%;border:2px solid #ffe8ac66;transform:rotate(45deg);border-radius:18%;}
+.slot-example-logo{position:absolute;top:6px;left:8%;width:60%;height:16px;object-fit:contain;object-position:left;z-index:1;}
+.slot-art-symbol{font-size:clamp(28px,7vw,60px);font-weight:950;color:#ffe6a1;text-shadow:0 3px #5b320e,0 0 16px #f7d470;z-index:1;}
+.slot-example-art strong{font-size:clamp(8px,2vw,15px);font-weight:900;color:#ffe7a5;text-align:center;text-shadow:0 2px #171815;z-index:1;}
+.slot-example-art>small{position:absolute;bottom:3px;right:5px;font-size:7px;color:#e7efd6;}
+.forest .slot-example-art{background:radial-gradient(#709652,#103a29 75%);}.candy .slot-example-art{background:radial-gradient(#efbdd8,#713daa 75%);}.seven .slot-example-art{background:radial-gradient(#be5936,#421426 75%);}.ocean .slot-example-art{background:radial-gradient(#3fc4cb,#153465 75%);}.moon .slot-example-art{background:radial-gradient(#a066e6,#241e48 75%);}
+.slot-example-title{display:block;padding:7px 3px;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;}
+.slot-empty,.slot-demo-note{font-size:11px;line-height:1.6;color:#9bad9f;padding:10px 0;margin:0;}.slot-search-error{font-size:12px;color:#ffb7a2;}
+.slot-lobby button:focus-visible,.slot-lobby input:focus-visible,.slot-lobby select:focus-visible{outline:2px solid #8effd4;outline-offset:2px;}

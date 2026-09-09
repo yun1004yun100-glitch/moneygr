@@ -1,0 +1,15 @@
+.mg-ticket-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr)); gap:16px; width:100%; min-width:0; }
+.mg-ticket-grid .mg-ticket { box-sizing:border-box; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; min-width:0; min-height:230px; padding:24px 28px; border:0; border-radius:18px; background:#061017 url('/coupon-ticket-background.png') center/100% 100% no-repeat; text-align:center; overflow:hidden; }
+.mg-ticket .mg-ticket-label { position:static; color:#ffe2a0; font-size:14px; line-height:1.4; font-weight:800; letter-spacing:.02em; }
+.mg-ticket .mg-ticket-value { position:static; display:block; margin:0; color:#fff3d1; font-size:36px; line-height:1.15; font-weight:900; letter-spacing:-1px; }
+.mg-ticket .mg-ticket-value small { font-size:16px; margin-left:5px; color:inherit; }
+.mg-ticket .mg-ticket-condition { position:static; margin:0; color:#c8d9dc; font-size:13px; line-height:1.5; word-break:keep-all; }
+.mg-ticket-grid .mg-ticket button.mg-ticket-use { position:static!important; display:flex; align-items:center; justify-content:center; gap:16px; width:min(100%,220px)!important; min-height:42px; height:auto!important; margin:4px 0 0!important; padding:10px 18px!important; border:1px solid #ffe4a1!important; border-radius:8px!important; background:linear-gradient(135deg,#ffe6a0,#d8a34b)!important; color:#ffffff!important; text-shadow:0 1px 3px rgba(0,0,0,.8)!important; font-size:14px!important; line-height:20px; font-weight:900; box-shadow:none!important; transform:none!important; cursor:pointer; }
+.mg-ticket-grid .mg-ticket button.mg-ticket-use::before,.mg-ticket-grid .mg-ticket button.mg-ticket-use::after { content:none!important; }
+.mg-ticket-grid .mg-ticket button.mg-ticket-use:hover { filter:brightness(1.1); }
+.mg-ticket-grid .mg-ticket button.mg-ticket-use:focus-visible { outline:2px solid white; outline-offset:3px; }
+.mg-ticket--free .mg-ticket-label,.mg-ticket--free .mg-ticket-value { color:#98ffea; }
+.mg-ticket-grid .mg-ticket--free button.mg-ticket-use { background:linear-gradient(135deg,#a4ffea,#3ed6bd)!important; border-color:#a4ffea!important; color:#05251f!important; }
+.mg-ticket-grid .mg-ticket { isolation:isolate; }
+.mg-ticket-grid .mg-ticket::before { content:''; position:absolute; inset:15% 20%; z-index:0; background:url('/moneyground-mg-emblem.png') center/contain no-repeat; opacity:.25; pointer-events:none; }
+.mg-ticket-grid .mg-ticket > * { z-index:1; }

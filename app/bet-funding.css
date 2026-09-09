@@ -1,0 +1,16 @@
+.bet-funding { border: 0; padding: 0; margin: 14px 0; min-width: 0; width: 100%; grid-column: 1 / -1; }
+.bet-funding legend { padding: 0; margin-bottom: 8px; font-size: 14px; color: #c8dbd8; font-weight: 700; }
+.bet-funding-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.bet-funding-options label { display: flex !important; align-items: center; gap: 7px; padding: 12px 8px !important; margin: 0 !important; border: 1px solid #29413e; border-radius: 9px; background: #101f20; cursor: pointer; min-width: 0; height: auto !important; min-height: 68px; grid-column: auto !important; box-sizing: border-box; }
+.bet-funding-options label.selected { border-color: #00d5bb; background: #09332f; }
+.bet-funding-options label.unavailable { opacity: .45; cursor: not-allowed; border-color: #29413e; background: #101f20; }
+.bet-funding-options input { width: 15px !important; height: 15px; min-width: 15px; margin: 0; accent-color: #00d5bb; }
+.bet-funding-options span { display: grid !important; gap: 5px; min-width: 0; }
+.bet-funding-options strong { color: #ebf6f3; font-size: 14px; line-height: 1.4; overflow-wrap: anywhere; }
+.bet-funding .bet-funding-options small { color: #8edbd0; font-size: 13px; overflow-wrap: anywhere; }
+.bet-funding-options label:focus-within { outline: 2px solid #b5fff0; outline-offset: 2px; }
+.bet-funding:disabled { opacity: .6; }
+.bet-funding:disabled label { cursor: wait; }
+.bet-funding-error { color: #ffadad; font-size: 13px; grid-column: 1 / -1; margin: 8px 0; }
+.bet-funding-note { color: #9dbbb5; font-size: 13px; grid-column: 1 / -1; }
+.slip .place-btn:disabled, .member-flash .member-bet-btn:disabled { opacity: .45; cursor: not-allowed; }

@@ -1,0 +1,5 @@
+/* Real alpha cutouts render normally; never rely on a blend-mode matte. */
+img[src^="/badges/achievement-"][src$="-transparent-v3.png"] {
+  mix-blend-mode: normal;
+  background: transparent !important;
+}
