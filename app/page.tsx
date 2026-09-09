@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { BetFundingSelector } from './BetFundingSelector';
 import { BET_FUNDING, betFundingError, type BetFunding } from './bet-funding';
 import { BrandLogo } from './BrandLogo';
+import { resolveBadgeAsset } from './badge-assets';
 import { MemberRollingProgress } from './MemberRollingProgress';
 import { recordRollingBet, type MemberRolling } from './member-rolling';
 import { advanceMemberLevel, memberLevelTarget } from './member-levels';
@@ -269,7 +270,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
       setEquippedTitle(savedTitle);
       const meta = ALL_TITLES_REGISTRY[savedTitle];
       const savedBadge=window.localStorage.getItem('moneyground_equipped_badge') || meta?.badge || '/badges/badge-3.png';
-      setEquippedBadge(savedBadge);
+      setEquippedBadge(resolveBadgeAsset(savedBadge));
       const savedGrade=window.localStorage.getItem('moneyground_equipped_grade') || meta?.grade || '신화';
       setEquippedGrade(savedGrade);
       if(!window.localStorage.getItem('moneyground_roulette_coupons_seed_100_v1')){
@@ -287,7 +288,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
         const b=window.localStorage.getItem('moneyground_equipped_badge') || meta?.badge || '/badges/badge-3.png';
         const g=window.localStorage.getItem('moneyground_equipped_grade') || meta?.grade || '신화';
         setEquippedTitle(t);
-        setEquippedBadge(b);
+        setEquippedBadge(resolveBadgeAsset(b));
         setEquippedGrade(g);
       }catch{}
     };

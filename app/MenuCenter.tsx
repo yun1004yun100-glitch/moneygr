@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { BrandLogo } from './BrandLogo';
+import { resolveBadgeAsset } from './badge-assets';
 import { MenuIcon } from './MenuIcon';
 import { DepositCouponPanel } from './DepositCouponPanel';
 import { depositCoupons, depositPreview } from './deposit-coupons';
@@ -160,9 +161,9 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
   });
   const [equippedBadge, setEquippedBadge] = useState(() => {
     try {
-      return window.localStorage.getItem('moneyground_equipped_badge') || propBadge || '/badges/badge-3.png';
+      return resolveBadgeAsset(window.localStorage.getItem('moneyground_equipped_badge') || propBadge || '/badges/badge-3.png');
     } catch {
-      return propBadge || '/badges/badge-3.png';
+      return resolveBadgeAsset(propBadge || '/badges/badge-3.png');
     }
   });
   const [equippedGrade, setEquippedGrade] = useState(() => {
