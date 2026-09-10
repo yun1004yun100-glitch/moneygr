@@ -38,3 +38,8 @@ next-env.d.ts
 /work/
 /.data/
 *.tgz
+# Retired runtime PNGs: retained only in workspace recovery, never republish.
+/public/landing-achievement-rewards.png
+/public/landing-page-reference.png
+/public/landing-reward-claim-cutout-v1.png
+/public/landing-reward-slide-user.png

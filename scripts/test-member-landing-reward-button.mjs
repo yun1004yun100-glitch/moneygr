@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import sharp from 'sharp';
 import postcss from 'postcss';
+import { createHash } from 'node:crypto';
 
 const path = 'public/landing-reward-claim-cutout-v2.png';
 const metadata = await sharp(path).metadata();
@@ -31,13 +32,12 @@ for (let y = 0; y < info.height; y++) {
   }
 }
 // The central button face and lettering must not be faded along with the glow.
-const previous = await sharp('public/landing-reward-claim-cutout-v1.png').ensureAlpha().raw().toBuffer();
+// Preserve the original face regression check without shipping an unused v1 PNG.
+const faceHash = createHash('sha256');
 for (let y = 35; y <= 90; y++) {
-  for (let x = 50; x <= 290; x++) {
-    const p = (y * info.width + x) * 4;
-    assert.deepEqual(data.subarray(p, p + 4), previous.subarray(p, p + 4), 'Button lettering/face changed');
-  }
+  faceHash.update(data.subarray((y * info.width + 50) * 4, (y * info.width + 291) * 4));
 }
+assert.equal(faceHash.digest('hex'), '550923363964f71aac821106927576b8cc7a42b975d5d09cdd16080cb22d730a', 'Button lettering/face changed');
 
 const component = fs.readFileSync('app/MemberLandingAchievements.tsx', 'utf8');
 assert.ok(component.includes('src="/landing-reward-claim-cutout-v2.png"'));
