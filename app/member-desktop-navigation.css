@@ -1,0 +1,144 @@
+/* Paid-member header only. Gold routes and the mobile bottom bar keep their own navigation. */
+@media (max-width: 720px) {
+  main > .member-desktop-header > .member-primary-nav,
+  main > .member-desktop-header > .member-service-nav {
+    display: none;
+  }
+}
+
+@media (min-width: 721px) {
+  main:not(.landing-view) > .topbar.member-desktop-header {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: 'brand primary actions' 'services services services';
+    height: auto;
+    min-height: 116px;
+    padding: 0 clamp(16px, 2vw, 32px);
+    column-gap: clamp(12px, 1.5vw, 24px);
+  }
+
+  main > .member-desktop-header > .brand { grid-area: brand; }
+  main > .member-desktop-header > .head-actions { grid-area: actions; }
+
+  main > .member-desktop-header .member-top-balances {
+    display: flex;
+    align-items: stretch;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  main > .member-desktop-header .member-top-balance {
+    display: grid;
+    align-content: center;
+    gap: 3px;
+    min-height: 48px;
+    padding: 7px 10px;
+    border: 1px solid #315950;
+    border-radius: 10px;
+    background: #082923;
+    text-align: left;
+  }
+
+  main > .member-desktop-header .member-top-balance small {
+    color: #b6d9d1;
+    font-size: 12px;
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  main > .member-desktop-header .member-top-balance b {
+    color: #a2f7e6;
+    font-size: 15px;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  main > .member-desktop-header .member-top-balance em {
+    font-size: 12px;
+    font-style: normal;
+  }
+
+  main > .member-desktop-header .member-top-point { border-color: #69582d; background: #282311; }
+  main > .member-desktop-header .member-top-point small { color: #e3d2a1; }
+  main > .member-desktop-header .member-top-point b { color: #ffdc7b; }
+  main > .member-desktop-header .member-top-point:focus-visible { outline: 2px solid #ffdc7b !important; outline-offset: 2px; }
+
+  main > .member-desktop-header > .member-primary-nav,
+  main > .member-desktop-header > .member-service-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    min-width: 0;
+    height: auto;
+  }
+
+  main > .member-desktop-header > .member-primary-nav {
+    grid-area: primary;
+    min-height: 72px;
+    gap: 0 clamp(6px, .8vw, 14px);
+    padding: 8px 0;
+  }
+
+  main > .member-desktop-header > .member-service-nav {
+    grid-area: services;
+    gap: 2px clamp(8px, 1.2vw, 20px);
+    padding: 6px 0;
+    border-top: 1px solid #8ffff018;
+  }
+
+  main > .member-desktop-header > nav > button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    flex: 0 0 auto;
+    min-height: 40px;
+    height: auto;
+    padding: 8px 4px;
+    white-space: nowrap;
+    color: #a7c2bc;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  main > .member-desktop-header > nav > button:hover,
+  main > .member-desktop-header > nav > button.active { color: #f5fffc; }
+
+  main > .member-desktop-header > nav > button:focus-visible {
+    outline: 2px solid #00d7c0;
+    outline-offset: 2px;
+  }
+
+  main > .member-desktop-header .member-nav-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    flex: 0 0 auto;
+    border-radius: 20px;
+    background: #e72f51;
+    color: #fff;
+    font-size: 10px;
+    line-height: 1;
+  }
+
+  /* The same services now remain at the top on home, games and community. */
+  main > .member-desktop-header ~ .service-bar { display: none; }
+}
+
+@media (min-width: 721px) and (max-width: 1200px) {
+  main:not(.landing-view) > .topbar.member-desktop-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'brand actions' 'primary primary' 'services services';
+    padding-top: 10px;
+  }
+
+  main > .member-desktop-header > .member-primary-nav {
+    min-height: 48px;
+    gap: 0 14px;
+  }
+}

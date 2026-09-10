@@ -1,0 +1,92 @@
+/* Paid-member pre-login palette only. Keep the existing artwork/hotspot geometry. */
+main.landing-view {
+  --landing-surface: #050808;
+  --landing-panel: #0b2421;
+  --landing-accent: #00d7c0;
+  --landing-text: #f5f8f7;
+  background: var(--landing-surface) !important;
+}
+
+main.landing-view .landing-reward-hero {
+  background: var(--landing-surface) !important;
+}
+
+/* Only the header artwork is retained; everything below the hero is native UI. */
+main.landing-view .landing-reference {
+  background: var(--landing-surface) !important;
+}
+
+main.landing-view .landing-reference > img:first-child {
+  clip-path: inset(0 0 calc(100% - var(--landing-rewards-top)) 0);
+}
+
+/* Retain the existing reward artwork, but lower its gold glare between slides. */
+main.landing-view .landing-reward-slide:not(:first-child) > img {
+  filter: saturate(.58) brightness(.76);
+}
+
+main.landing-view .landing-reward-slide-copy span {
+  color: var(--landing-accent);
+}
+
+main.landing-view .landing-reward-slide-copy b {
+  color: var(--landing-text);
+}
+
+main.landing-view .landing-reward-slide-copy small {
+  color: #b7d8d1;
+}
+
+/* Real text replaces the pink/blue button images without moving their hit areas. */
+main.landing-view .landing-reference .landing-auth-action {
+  background: linear-gradient(145deg, #123b35, #0b2421) !important;
+  border: 1px solid #356d62 !important;
+  border-radius: 8px !important;
+  color: var(--landing-text) !important;
+  font-size: clamp(10px, 3.15cqw, 22px) !important;
+  font-weight: 800;
+  line-height: 1.2 !important;
+  text-shadow: 0 1px 2px #032722;
+  box-shadow: inset 0 1px 0 #ffffff12 !important;
+}
+
+main.landing-view .landing-reference .landing-auth-action.join {
+  background: linear-gradient(145deg, #087e70, #07594f) !important;
+  border-color: #20baa5 !important;
+}
+
+main.landing-view .landing-reference .landing-auth-action:focus-visible {
+  outline-color: var(--landing-accent);
+}
+
+/* Carry the same palette into pre-login dialogs; member screens remain untouched. */
+main.landing-view .landing-auth-form .submit-btn,
+main.landing-view .landing-auth-form .signup-link,
+main.landing-view .signup-submit,
+main.landing-view .join-grid > button {
+  background: linear-gradient(145deg, #087e70, #07594f) !important;
+  border: 1px solid #20baa5 !important;
+  border-radius: 10px !important;
+  color: var(--landing-text) !important;
+  font-size: 16px !important;
+  font-weight: 800;
+  line-height: 1.2 !important;
+  text-shadow: none !important;
+  box-shadow: inset 0 1px 0 #ffffff12 !important;
+}
+
+main.landing-view .landing-auth-form .signup-link {
+  background: var(--landing-panel) !important;
+  border-color: #356d62 !important;
+}
+
+main.landing-view > .gold-v2-global-nav {
+  background: linear-gradient(180deg, #081716f5, #050c0cfb) !important;
+  box-shadow: 0 -1px 0 #315052, 0 -10px 30px #0006 !important;
+}
+
+main.landing-view > .gold-v2-global-nav button.home,
+main.landing-view > .gold-v2-global-nav button.active,
+main.landing-view > .gold-v2-global-nav button.active span {
+  color: #78ffe8 !important;
+}

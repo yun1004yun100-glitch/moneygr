@@ -1,0 +1,153 @@
+/* One continuous surface starts exactly where the hero ends. */
+main.landing-view .landing-reference {
+  --landing-hero-top: calc(22.4% + 20px);
+  --landing-rewards-top: min(calc(22.4% + 20px + 37.037cqw), 56%);
+  --landing-lower-surface: #050d0c;
+}
+
+main.landing-view .landing-reward-hero {
+  top: var(--landing-hero-top);
+  height: calc(var(--landing-rewards-top) - var(--landing-hero-top));
+  aspect-ratio: auto;
+}
+
+main.landing-view .landing-reward-hero::after {
+  content: '';
+  position: absolute;
+  z-index: 2;
+  inset: auto 0 0;
+  height: clamp(10px, 3cqw, 20px);
+  background: linear-gradient(0deg, var(--landing-lower-surface), transparent);
+  pointer-events: none;
+}
+
+main.landing-view .landing-reference > .landing-rewards-content {
+  position: absolute;
+  z-index: 3;
+  inset: var(--landing-rewards-top) 0 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: clamp(8px, 2cqw, 16px);
+  padding: clamp(10px, 2.4cqw, 18px) clamp(10px, 3cqw, 24px) clamp(14px, 3.2cqw, 24px);
+  background:
+    radial-gradient(ellipse at 50% 100%, #bc851a0a, transparent 55%),
+    linear-gradient(180deg, var(--landing-lower-surface), #06110f 52%, #050b0b);
+  container-type: size;
+  line-height: 1.2;
+}
+
+main.landing-view .landing-achievement-panel {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: clamp(4px, 1cqw, 8px);
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+main.landing-view .landing-achievement-panel h2 {
+  margin: 0;
+  color: #ebd285;
+  text-align: center;
+  font-size: clamp(13px, min(3.8cqw, 5.6cqh), 24px);
+  font-weight: 850;
+  line-height: 1.25;
+  letter-spacing: -.055em;
+}
+
+main.landing-view .landing-achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: 4px clamp(3px, 1cqw, 10px);
+  min-height: 0;
+  min-width: 0;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+main.landing-view .landing-achievement-grid li {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  justify-items: center;
+  gap: 2px;
+  min-height: 0;
+  min-width: 0;
+}
+
+main.landing-view .landing-achievement-grid img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  max-width: 160px;
+  object-fit: contain;
+}
+
+main.landing-view .landing-achievement-grid span {
+  color: #f5f8f7;
+  font-size: clamp(10px, min(2.8cqw, 4.2cqh), 16px);
+  font-weight: 600;
+  line-height: 1.2;
+  min-height: 2.4em;
+  text-align: center;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+/* Original artwork contains its lettering and bloom; never recreate it as a button background. */
+main.landing-view .landing-reference .landing-reward-claim {
+  position: relative;
+  justify-self: center;
+  /* The gold face is centered at x=171 in a 367px canvas (center x=183). */
+  translate: 3.27% 0;
+  display: grid;
+  place-items: center;
+  width: min(100%, 480px);
+  height: auto;
+  aspect-ratio: 367 / 116;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  appearance: none;
+  overflow: visible;
+  line-height: 0;
+  text-shadow: none;
+  box-shadow: none;
+  cursor: pointer;
+  transition: filter .15s ease, transform .15s ease;
+}
+
+main.landing-view .landing-reference .landing-reward-claim img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}
+
+main.landing-view .landing-reference .landing-reward-claim:hover {
+  filter: brightness(1.08);
+}
+
+main.landing-view .landing-reference .landing-reward-claim:active {
+  transform: translateY(1px);
+}
+
+main.landing-view .landing-reference .landing-reward-claim:focus-visible {
+  outline: 2px solid #fff1b3;
+  outline-offset: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main.landing-view .landing-reference .landing-reward-claim {
+    transition: none;
+  }
+}

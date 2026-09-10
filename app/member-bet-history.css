@@ -1,0 +1,49 @@
+.member-bet-history { width: min(100% - 32px, 1100px); margin: 32px auto 100px; color: #effffb; }
+.member-history-heading { display: flex; justify-content: space-between; align-items: end; gap: 16px; padding-bottom: 22px; border-bottom: 1px solid #245148; }
+.member-history-heading h1 { margin: 12px 0 0; font-size: clamp(26px, 4vw, 34px); }
+.member-history-heading > span { color: #abc8c1; font-size: 14px; white-space: nowrap; }
+.member-history-heading > span b { color: #4ae9cf; }
+.member-bet-history .member-history-back { padding: 0; min-height: 32px; background: none; border: 0; color: #a6c5bc; font-size: 14px; }
+.member-history-notice { padding: 14px 16px; margin: 20px 0; border-radius: 10px; background: #0f2924; color: #b6d3ca; font-size: 14px; line-height: 1.6; }
+.member-history-filters { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
+.member-history-categories { display: flex; flex-wrap: wrap; gap: 8px; }
+.member-history-categories button { min-height: 42px; padding: 10px 16px; color: #b8d0c8; background: #0b211c; border: 1px solid #254e44; border-radius: 9px; font-size: 14px; }
+.member-history-categories button[aria-pressed="true"] { color: #eafff6; background: #075c4e; border-color: #16bf9f; }
+.member-history-status { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #c2dbd3; }
+.member-history-status select { color: #effffb; background: #0c251f; border: 1px solid #345a4e; border-radius: 8px; padding: 10px 12px; min-height: 42px; font-size: 14px; }
+.member-history-count { margin: 22px 0 14px; color: #a8c4bc; font-size: 14px; }
+.member-history-count b { color: #effffb; }
+.member-history-list { display: grid; gap: 16px; }
+.member-history-card { min-width: 0; padding: 22px; background: linear-gradient(135deg, #0c2420, #071715); border: 1px solid #214b41; border-radius: 16px; }
+.member-history-card > header { display: flex; justify-content: space-between; align-items: start; gap: 12px; }
+.member-history-card h2 { margin: 7px 0; font-size: 18px; }
+.member-history-category { font-size: 13px; font-weight: 800; color: #53e6ce; }
+.member-history-card time { color: #9eb8b0; font-size: 13px; }
+.member-history-result { flex-shrink: 0; padding: 7px 10px; font-size: 13px; border-radius: 7px; background: #293b36; color: #bfd0ca; }
+.member-history-result.pending { background: #3b321b; color: #f2d48b; }
+.member-history-result.won { background: #104c3f; color: #56f2c8; }
+.member-history-result.lost { background: #432329; color: #ffa5b0; }
+.member-history-selections { display: grid; gap: 12px; list-style: none; margin: 20px 0; padding: 16px 0; border-top: 1px solid #23463d; border-bottom: 1px solid #23463d; }
+.member-history-selections li { display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 8px 16px; font-size: 14px; }
+.member-history-selections li > span { overflow-wrap: anywhere; color: #d4e6e0; }
+.member-history-selections b { color: #eefbf5; }
+.member-history-selections em { margin-left: 10px; font-style: normal; color: #68e4cd; }
+.member-history-outcome { color: #abc7be; font-size: 14px; }
+.member-history-outcome b { color: #ecfff6; margin-left: 8px; }
+.member-history-card dl { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 18px 0; }
+.member-history-card dt { color: #a0bfb4; font-size: 13px; margin-bottom: 7px; }
+.member-history-card dd { margin: 0; font-size: 16px; font-weight: 800; overflow-wrap: anywhere; }
+.member-history-card dd.is-win { color: #58eec9; }
+.member-history-id { display: block; color: #829f94; font-size: 12px; overflow-wrap: anywhere; }
+.member-history-empty { display: grid; justify-items: center; gap: 12px; padding: 60px 20px; border: 1px dashed #31574a; border-radius: 16px; text-align: center; background: #0b201a; }
+.member-history-empty > span { color: #59a58d; font-size: 34px; }
+.member-history-empty h2 { margin: 0; font-size: 18px; }
+.member-history-empty p { margin: 0; color: #b1cbbf; font-size: 14px; line-height: 1.6; }
+.member-bet-history .member-history-empty button { padding: 12px 28px; color: #effff8; background: #087b61; border: 1px solid #18bc97; border-radius: 9px; font-size: 16px; }
+.member-bet-history button:focus-visible, .member-bet-history select:focus-visible { outline: 2px solid #45edca; outline-offset: 3px; }
+@media (max-width: 720px) {
+  .member-bet-history { margin-top: 24px; }
+  .member-history-card { padding: 18px 14px; }
+  .member-history-card dl { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .member-history-categories button { padding: 10px 12px; }
+}

@@ -1362,6 +1362,29 @@
   }
 }
 
+/* Shared journey presentation: retain level styling without per-category overrides. */
+.member-level-map.member-achievement-journey {
+  height: var(--journey-height, 375px) !important;
+}
+
+.member-achievement-journey:not([data-road="level"]) .member-level-node:not(.final) {
+  max-width: 21%;
+}
+
+.member-achievement-journey .member-level-node small.title-reward {
+  box-sizing: border-box;
+  max-width: 100%;
+  white-space: normal !important;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 560px) {
+  .member-level-map.member-achievement-journey {
+    height: var(--journey-height, 365px) !important;
+  }
+}
+
 /* ============================================================
    🏆 ACHIEVEMENT & QUEST CELEBRATION TOAST (GLOBAL TOP-TIER UI)
 ============================================================ */

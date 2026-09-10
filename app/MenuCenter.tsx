@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { BrandLogo } from './BrandLogo';
 import { resolveBadgeAsset } from './badge-assets';
 import { MenuIcon } from './MenuIcon';
+import { MemberAchievementJourney } from './MemberAchievementJourney';
 import { DepositCouponPanel } from './DepositCouponPanel';
 import { depositCoupons, depositPreview } from './deposit-coupons';
 import './coupon-tickets.css';
@@ -200,34 +201,6 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
   const sportsValues = [0, 3, 4, 5, 6, 7, 8, 9, 10];
   const singleValues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
 
-  // 2D 로드맵 노드 좌표 (좌우 14%~86% 여백 확보로 글자 잘림 완전 방지)
-  const standardPoints = [
-    [14, 26], [32, 26], [50, 26], [68, 26], [86, 26],
-    [86, 54], [68, 54], [50, 54], [32, 54],
-    [18, 76], [50, 84]
-  ];
-  const depositPoints = depositValues.map((_, index) => {
-    const row = Math.floor(index / 5);
-    const column = index % 5;
-    return [row % 2 === 0 ? 14 + column * 18 : 86 - column * 18, 24 + row * 16];
-  });
-  const withdrawPoints = withdrawValues.map((_, index) => {
-    const row = Math.floor(index / 4);
-    const column = index % 4;
-    return [row % 2 === 0 ? 14 + column * 24 : 86 - column * 24, 24 + row * 20];
-  });
-  const sportsPoints = sportsValues.map((_, index) => {
-    const row = Math.floor(index / 5);
-    const column = index % 5;
-    return [row === 0 ? 14 + column * 18 : 86 - (index - 5) * 24, 32 + row * 36];
-  });
-  const slotPoints = slotValues.map((_, index) => {
-    const row = Math.floor(index / 4);
-    const column = index % 4;
-    return [row === 0 ? 14 + column * 24 : 86 - (index - 4) * 28, 34 + row * 34];
-  });
-  const fivePoints = [[14, 52], [32, 52], [50, 52], [68, 52], [86, 52]];
-
   const gameRoad = ['casino', 'sports', 'slots', 'mini'].includes(road);
   const values = road === 'level' ? levelValues
     : road === 'referral' ? referralValues
@@ -239,28 +212,9 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
     : road === 'single' ? singleValues
     : sportsValues;
 
-  const points = road === 'deposit' ? depositPoints
-    : road === 'withdraw' ? withdrawPoints
-    : road === 'slots' ? slotPoints
-    : road === 'sports' ? sportsPoints
-    : (road === 'casino' || road === 'mini') ? fivePoints
-    : standardPoints.slice(0, values.length);
-
   const current = road === 'level' ? Math.min(1000, Math.max(1, level))
     : road === 'single' ? 1
     : 0;
-
-  const segment = Math.min(
-    values.length - 2,
-    Math.max(
-      0,
-      values.findIndex((target, index) => index < values.length - 1 && current >= target && current < values[index + 1])
-    )
-  );
-  const progress = values[segment + 1] === values[segment] ? 0 : (current - values[segment]) / (values[segment + 1] - values[segment]);
-  const from = points[segment];
-  const to = points[Math.min(segment + 1, points.length - 1)];
-  const marker = [from[0] + (to[0] - from[0]) * progress, from[1] + (to[1] - from[1]) * progress];
 
   const singleStepNames = [
     '도전 시작', '첫 로그인', '오류 보고 1회', '업적 3개 달성',
@@ -288,91 +242,6 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
     : road === 'mini' ? '미니게임 연승 여정'
     : road === 'slots' ? '슬롯 누적 스핀 여정'
     : '스포츠 폴더 적중 여정';
-
-  const finalReward =
-    road === 'level' ? '마스터 칭호 + 전용 뱃지'
-    : road === 'referral' ? '추천의 제왕 칭호 + 전용 뱃지'
-    : road === 'deposit' ? '금고의 주인 칭호 + 전용 뱃지'
-    : road === 'withdraw' ? '출금의 마스터 칭호 + 전용 뱃지'
-    : road === 'single' ? '개척자 칭호 + 전용 뱃지'
-    : road === 'slots' ? '슬롯의 신 칭호 + 전용 뱃지'
-    : road === 'sports' ? '스포츠의 신 칭호 + 전용 뱃지'
-    : '연승의 신 칭호 + 전용 뱃지';
-
-  const rewardNote = (value: number, index: number) => {
-    if (road === 'deposit') {
-      if (index === values.length - 1) return '금고의 주인 칭호';
-      if (value === 10_000_000) return '실버 VIP';
-      if (value === 50_000_000) return '골드 VIP';
-      if (value === 100_000_000) return '다이아 클럽';
-      if (value === 300_000_000) return '입금의 귀족';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'withdraw') {
-      if (index === values.length - 1) return '출금의 마스터';
-      if (value === 1_000_000) return '짜릿한 승리자';
-      if (value === 50_000_000) return '환전의 달인';
-      if (value === 1_000_000_000) return '현금화의 마술사';
-      if (value === 5_000_000_000) return '슈퍼리치';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'single') {
-      if (value === 1) return '첫 발걸음 칭호';
-      if (value === 2) return '버그 헌터 칭호';
-      if (value === 3) return '업적 도전자';
-      if (value === 5) return '업적 수집가';
-      if (value === 8) return '업적 마스터';
-      if (index === values.length - 1) return '개척자 칭호';
-      return '+보상';
-    }
-    if (road === 'slots') {
-      if (value === 100) return '행운의 릴';
-      if (value === 500) return '스핀 매니아';
-      if (value === 1000) return '잭팟의 왕';
-      if (value === 5000) return '메가 볼텍스';
-      if (value === 10000) return '슬롯의 신';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'sports') {
-      if (value === 3) return '승부 예측가';
-      if (value === 5) return '적중의 묘수';
-      if (value === 6) return '스포츠 전략가';
-      if (value === 8) return '빅토리 마스터';
-      if (value === 10) return '스포츠의 신';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'casino') {
-      if (value === 3) return '승리의 기세';
-      if (value === 5) return '하이롤러';
-      if (value === 7) return '황금의 손';
-      if (value === 10) return '연승의 신';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'mini') {
-      if (value === 3) return '직관의 승부사';
-      if (value === 5) return '예측의 달인';
-      if (value === 7) return '확률의 지배자';
-      if (value === 10) return '미니게임 황제';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'referral') {
-      if (value === 1) return '인맥의 시작';
-      if (value === 3) return '소문난 인싸';
-      if (value === 5) return '마당발';
-      if (value === 7) return '추천회장';
-      if (value === 10) return '추천의 제왕';
-      if (value > 0) return '+보상';
-    }
-    if (road === 'level') {
-      if (value === 1) return '루키 칭호';
-      if (value === 100) return '비기너 칭호';
-      if (value === 300) return '준프로 칭호';
-      if (value === 500) return '프로 칭호';
-      if (index === values.length - 1) return '마스터 칭호';
-      if (value > 0) return '+보상';
-    }
-    return undefined;
-  };
 
   // 칭호 등급별 프레임 클래스 매핑
   const getGradeClass = (grade?: string) => {
@@ -726,79 +595,14 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
 
           {/* 세분화 마일스톤 여정 맵 (단일 업적 카테고리는 로드맵 없이 리스트만 표시) */}
           {road !== 'single' && (
-            <>
-              <section
-                className={`member-level-map ${road === 'deposit' ? 'member-deposit-road' : road === 'withdraw' ? 'member-withdraw-road' : ''}`}
-                aria-label={`${roadTitle} 진행 경로`}
-              >
-                <header>
-                  <b>{roadTitle}</b>
-                  <small>
-                    {road === 'level' ? `현재 위치 ${current.toLocaleString()}레벨`
-                      : road === 'referral' ? '현재 추천 0명'
-                      : road === 'deposit' ? '현재 누적 입금 0원'
-                      : road === 'withdraw' ? '현재 누적 출금 0원'
-                      : road === 'slots' ? '현재 누적 스핀 0회'
-                      : '현재 연승 0회'}
-                  </small>
-                </header>
-
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                  <polyline points={points.map(p => p.join(',')).join(' ')} />
-                </svg>
-
-                {values.map((target, index) => {
-                  const note = rewardNote(target, index);
-                  const isFinalNode = index === values.length - 1;
-                  const matchedAchievement = detailedAchievements.find(item => {
-                    if (road === 'casino' || road === 'sports' || road === 'slots' || road === 'mini') {
-                      return item.category === 'game' && item.gameType === road && item.target === target;
-                    }
-                    return item.category === road && item.target === target;
-                  });
-
-                  const hasBadge = !!matchedAchievement?.badge || isFinalNode;
-                  const badgeSrc = matchedAchievement?.badge || (road === 'level' ? '/badges/badge-level-1000.png' : '/badges/badge-3.png');
-
-                  return (
-                    <div
-                      key={target}
-                      className={`member-level-node ${current >= target ? 'complete' : ''} ${isFinalNode ? 'final' : ''} ${hasBadge ? 'badge-reward' : ''}`}
-                      style={{ left: `${points[index][0]}%`, top: `${points[index][1]}%` }}
-                    >
-                      {hasBadge ? (
-                        <img className={isFinalNode ? 'member-final-badge' : 'member-milestone-badge'} src={badgeSrc} alt={`${label(target)} 보상 뱃지`} />
-                      ) : (
-                        <i />
-                      )}
-                      <b>{label(target)}</b>
-                      {note && <small className={note.includes('칭호') ? 'title-reward' : ''}>{note}</small>}
-                    </div>
-                  );
-                })}
-
-                <span className="member-level-marker" style={{ left: `${marker[0]}%`, top: `${marker[1]}%` }} />
-              </section>
-
-              {/* 마일스톤 달성 보상 배너 */}
-              <footer className="member-level-reward">
-                <span>
-                  {road === 'level' ? '1,000레벨'
-                    : road === 'referral' ? '추천 10명'
-                    : road === 'deposit' ? '누적 입금 100억'
-                    : road === 'withdraw' ? '누적 출금 100억'
-                    : road === 'slots' ? '누적 10,000회 스핀'
-                    : road === 'sports' ? '10폴더 적중'
-                    : '10연승'} 달성 보상
-                </span>
-                <b>{finalReward}</b>
-                <small>
-                  {road === 'deposit' ? '3억 달성 시 입금의 귀족 칭호를 먼저 지급합니다.'
-                    : road === 'withdraw' ? '10억 달성 시 현금화의 마술사 칭호를 먼저 지급합니다.'
-                    : '각 구간 달성 시 리워드와 칭호가 지급됩니다.'}
-                </small>
-              </footer>
-            </>
+            <MemberAchievementJourney
+              road={road}
+              title={roadTitle}
+              values={values}
+              current={current}
+              label={label}
+              achievements={filteredAchievements}
+            />
           )}
 
           {/* 전용 업적 리스트 (Achievement Cards) */}

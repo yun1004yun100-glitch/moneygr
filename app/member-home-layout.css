@@ -1,0 +1,12 @@
+/* Keep the desktop hero; mobile image menus use the desktop top navigation instead. */
+@media (min-width: 721px) {
+  main.member-home-view > .member-mobile-v2 > .member-intro-slider,
+  main.member-home-view > .member-mobile-v2 > .member-v2-grid,
+  main.member-home-view > .sports-section,
+  main.member-home-view > .lounge-section,
+  main.member-home-view > .promo-grid,
+  main.member-home-view > .info-section,
+  main.member-home-view > .big-wheel-launch {
+    display: none !important;
+  }
+}

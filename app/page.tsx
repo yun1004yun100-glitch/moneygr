@@ -4,6 +4,13 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { BetFundingSelector } from './BetFundingSelector';
 import { BET_FUNDING, betFundingError, type BetFunding } from './bet-funding';
 import { BrandLogo } from './BrandLogo';
+import { MemberLandingAchievements } from './MemberLandingAchievements';
+import { MemberDesktopNavigation } from './MemberDesktopNavigation';
+import { MEMBER_SPORTS_CATEGORIES, filterMemberSportsMatches, type MemberSportsCategory } from './member-sports-categories';
+import './member-sports-categories.css';
+import { MemberProfileMenu } from './MemberProfileMenu';
+import { MemberBetHistory } from './MemberBetHistory';
+import { createSportsBetRecord, createMiniBetRecord, memberMiniGameTitle, type MemberBetRecord } from './member-bet-history';
 import { resolveBadgeAsset } from './badge-assets';
 import { MemberRollingProgress } from './MemberRollingProgress';
 import { recordRollingBet, type MemberRolling } from './member-rolling';
@@ -20,6 +27,9 @@ import {
   getClaimedQuestIds,
 } from './achievements-data';
 import './home-header.css';
+import './member-home-layout.css';
+import './member-feedback.css';
+import './member-landing-theme.css';
 import './big-wheel.css';
 import './casino-provider-cards.css';
 import './achievement-center.css';
@@ -30,14 +40,14 @@ type Game = { id:number; title:string; maker:string; icon:string; tone:string; c
 type Bet = { matchId:number; title:string; pick:string; odd:number };
 type GoldPlayer = { id:string; nickname:string; money:number; gold:number; level:number; levelBetting:number; totalBetting:number; requiredBetting:number; progressPercent:number; pendingRewards:number; rewardVouchers:number; rewardHistory:{voucherCount:number;createdAt:string}[] };
 type MemberPlayer = { level:number; levelBetting:number; requiredBetting:number; rolling?:MemberRolling; pendingRewards:number };
-type AppView = 'landing'|'entry'|'home'|'sports'|'casino'|'mini'|'bigwheel'|'gold'|'goldSports'|'goldEvents'|'goldFlash'|'community';
+type AppView = 'landing'|'entry'|'home'|'sports'|'casino'|'mini'|'bigwheel'|'gold'|'goldSports'|'goldEvents'|'goldFlash'|'community'|'bettingHistory';
 
-const viewPaths:Record<AppView,string>={landing:'/',entry:'/entry',home:'/member',sports:'/sports',casino:'/casino',mini:'/mini',bigwheel:'/big-wheel',gold:'/gold-game',goldSports:'/gold/sports',goldEvents:'/gold/events',goldFlash:'/gold/play',community:'/community'};
+const viewPaths:Record<AppView,string>={landing:'/',entry:'/entry',home:'/member',sports:'/sports',casino:'/casino',mini:'/mini',bigwheel:'/big-wheel',gold:'/gold-game',goldSports:'/gold/sports',goldEvents:'/gold/events',goldFlash:'/gold/play',community:'/community',bettingHistory:'/betting-history'};
 const goldViews:AppView[]=['gold','goldSports','goldEvents','goldFlash','community'];
 const viewFromPath=(path:string):AppView=>{
   const base=(path.split('?')[0].replace(/\/$/,'')||'/');
   return ({
-    '/':'landing','/entry':'entry','/member':'home','/sports':'sports','/casino':'casino','/mini':'mini','/big-wheel':'bigwheel','/gold-game':'gold','/gold/sports':'goldSports','/gold/events':'goldEvents','/gold/play':'goldFlash','/community':'community',
+    '/':'landing','/entry':'entry','/member':'home','/sports':'sports','/casino':'casino','/mini':'mini','/big-wheel':'bigwheel','/gold-game':'gold','/gold/sports':'goldSports','/gold/events':'goldEvents','/gold/play':'goldFlash','/community':'community','/betting-history':'bettingHistory',
   }[base] as AppView||'landing');
 };
 
@@ -111,8 +121,10 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
   const initialView=viewFromPath(initialPath);
   const [entryOpen,setEntryOpen] = useState(false);
   const [view,setView] = useState<AppView>(initialView);
+  const memberFeedback = !(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view);
   const [gameFilter,setGameFilter] = useState('라이브 카지노');
   const [sportFilter,setSportFilter] = useState('전체');
+  const [sportsCategory,setSportsCategory] = useState<MemberSportsCategory>('국내스포츠');
   const [query,setQuery] = useState('');
   const [searchOpen,setSearchOpen] = useState(false);
   const [loginOpen,setLoginOpen] = useState(false);
@@ -122,10 +134,17 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
   const [loggedIn,setLoggedIn] = useState(false);
   const [favorites,setFavorites] = useState<number[]>([1,4]);
   const [bets,setBets] = useState<Bet[]>([]);
+  // Session-only preview records. Do not substitute these for a server/account ledger.
+  const [memberBetHistory,setMemberBetHistory] = useState<MemberBetRecord[]>([]);
   const [slipOpen,setSlipOpen] = useState(false);
   const [stake,setStake] = useState(100);
   const [credit,setCredit] = useState(1250000);
   const [toast,setToast] = useState('');
+  const [memberFeedbackId,setMemberFeedbackId] = useState(0);
+  const notifyBetting = (message:string) => {
+    if(memberFeedback) setMemberFeedbackId(id=>id+1);
+    setToast(message);
+  };
   const {achievement,activeToast,recordResult,dismissAchievement}=useAchievementNotifications();
   const [noticeOpen,setNoticeOpen] = useState(false);
   const [manageOpen,setManageOpen] = useState(false);
@@ -296,7 +315,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
     return ()=>window.removeEventListener('storage', handleStorage);
   },[]);
 
-  useEffect(()=>{ if(!toast) return; const t=setTimeout(()=>setToast(''),2600); return()=>clearTimeout(t); },[toast]);
+  useEffect(()=>{ if(!toast) return; const t=setTimeout(()=>setToast(''),memberFeedback?5000:2600); return()=>clearTimeout(t); },[toast,memberFeedback,memberFeedbackId]);
   useEffect(()=>{
     const isLocked = entryOpen||loginOpen||signupOpen||introPlaying||liveChatOpen||manageOpen||menuScreen||goldRankingOpen||goldAchievementOpen||view==='landing';
     document.body.style.overflow = isLocked ? 'hidden' : '';
@@ -335,6 +354,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
     return matchFilter && (`${g.title} ${g.maker}`).toLowerCase().includes(query.toLowerCase());
   }),[gameFilter,query]);
   const filteredMatches = useMemo(()=>matches.filter(m=>(sportFilter==='전체'||m.sport===sportFilter)&&(`${m.home} ${m.away} ${m.league}`).toLowerCase().includes(query.toLowerCase())),[sportFilter,query]);
+  const visibleSportsMatches = view === 'sports' ? filterMemberSportsMatches(filteredMatches, sportsCategory) : filteredMatches;
   const totalOdd = bets.reduce((a,b)=>a*b.odd,1);
   const expected = Math.floor(stake*totalOdd);
 
@@ -348,13 +368,17 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
   };
   const placeBet = () => {
     if(sportsSubmitting.current)return;
-    if(!bets.length){setToast('선택한 경기가 없습니다.');return;}
+    if(!bets.length){notifyBetting('선택한 경기가 없습니다.');return;}
     const source:BetFunding=(view==='home'||view==='sports')?sportsFunding:'money';
     const balance=source==='support'?supportFundRef.current:creditRef.current;
     const error=betFundingError(stake,balance,10,limit);
-    if(error){setToast(error);return;}
+    if(error){notifyBetting(error);return;}
     sportsSubmitting.current=true;
     (source==='support'?updateSupportFund:updateCredit)(c=>c-stake);
+    if(loggedIn && (view==='home'||view==='sports')){
+      const record=createSportsBetRecord(bets,stake,source);
+      setMemberBetHistory(previous=>[record,...previous]);
+    }
     setBets([]); setSlipOpen(false);
     window.setTimeout(()=>{sportsSubmitting.current=false;},0);
     updateMemberPlayer(prev => {
@@ -363,7 +387,9 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
         rolling: (view==='home'||view==='sports')?recordRollingBet(prev.rolling,stake):prev.rolling,
       };
     });
-    setToast(`${BET_FUNDING[source].label} ${stake.toLocaleString()}${BET_FUNDING[source].unit} 베팅이 접수되었습니다 · MG${Date.now().toString().slice(-6)}`);
+    notifyBetting(memberFeedback
+      ? `배팅이 완료되었습니다.\n${BET_FUNDING[source].label} ${stake.toLocaleString()} ${BET_FUNDING[source].unit} · ${bets.length}경기 접수`
+      : `${BET_FUNDING[source].label} ${stake.toLocaleString()}${BET_FUNDING[source].unit} 베팅이 접수되었습니다 · MG${Date.now().toString().slice(-6)}`);
   };
   const toggleFav=(id:number)=>{setFavorites(f=>f.includes(id)?f.filter(x=>x!==id):[...f,id]);setToast(favorites.includes(id)?'즐겨찾기에서 삭제했습니다.':'즐겨찾기에 추가했습니다.');};
   const navigate=(next:AppView,behavior:ScrollBehavior='smooth')=>{
@@ -375,6 +401,12 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
     window.scrollTo({top:0,behavior});
   };
   const go=(next:'home'|'sports'|'casino'|'mini')=>navigate(next);
+  const openMemberBetHistory=()=>{
+    if(!loggedIn){setLoginOpen(true);return;}
+    setMenuScreen(null);
+    setSlipOpen(false);
+    navigate('bettingHistory');
+  };
   const goGoldFlash=()=>navigate('goldFlash');
   const goGold=(next:'gold'|'goldSports'|'goldEvents')=>navigate(next);
   const goCommunity=()=>navigate('community');
@@ -412,6 +444,10 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
         updateWallet(c=>c+Math.floor(amount*mult));
       }
       recordResult('member',won);
+      if(loggedIn){
+        const record=createMiniBetRecord({gameId:selectedMiniGame,amount,funding:source,pick,result:resultPick,won});
+        setMemberBetHistory(previous=>[record,...previous]);
+      }
       return {resultNumber:pScore*10+bScore,resultPick,won,leveledUp};
     }else{
       const resultNumber=Math.floor(Math.random()*10)+1;
@@ -421,6 +457,10 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
         updateWallet(c=>c+amount*2);
       }
       recordResult('member',won);
+      if(loggedIn){
+        const record=createMiniBetRecord({gameId:selectedMiniGame,amount,funding:source,pick,result:resultPick,won});
+        setMemberBetHistory(previous=>[record,...previous]);
+      }
       return {resultNumber,resultPick,won,leveledUp};
     }
   };
@@ -501,12 +541,25 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
   if(view==='entry') return <EntryGate onCasino={()=>enter('home')} onSports={()=>enter('gold')}/>;
 
   return (
-    <main id="top" className={`${goldMode||view==='gold'||view==='goldSports'||view==='goldEvents'||view==='goldFlash'?'gold-mode':''} ${view==='gold'?'gold-mobile-v2-active':''} ${(view==='goldFlash'||view==='goldSports'||view==='sports')?'gold-betting-view':''} ${view==='landing'?'landing-view':''} ${view==='community'?'community-view':''}`}>
+    <main id="top" className={`${goldMode||view==='gold'||view==='goldSports'||view==='goldEvents'||view==='goldFlash'?'gold-mode':''} ${view==='gold'?'gold-mobile-v2-active':''} ${(view==='goldFlash'||view==='goldSports'||view==='sports')?'gold-betting-view':''} ${view==='landing'?'landing-view':''} ${view==='community'?'community-view':''} ${view==='home'?'member-home-view':''}`}>
       {introPlaying&&<LandingIntro onDone={disableNextTime=>{try{window.sessionStorage.setItem('moneyground-intro-played','1');if(disableNextTime)window.localStorage.setItem('moneyground-intro-disabled','1')}catch{}setIntroPlaying(false);setLoginOpen(true)}}/>}
-      <header className="topbar">
-        <button className="brand" onClick={()=>navigate(goldMode?'gold':'home')} aria-label={goldMode?'꽁게임 홈':'유료회원 홈'}><BrandLogo/>{(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)&&<span className="gold-page-brand">KKONG GAME</span>}</button>
-        {(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view) ? <nav aria-label="꽁게임 주요 메뉴"><button className={view==='gold'?'active':''} onClick={()=>goGold('gold')}>홈</button><button className={view==='goldFlash'?'active':''} onClick={goGoldFlash}>플래시게임</button><button className={view==='goldSports'?'active':''} onClick={()=>goGold('goldSports')}>스포츠</button><button className={view==='goldEvents'?'active':''} onClick={()=>goGold('goldEvents')}>이벤트</button><button className={goldAchievementOpen?'active':''} onClick={()=>setGoldAchievementOpen(true)}>칭호/업적{unclaimedAchievementCount > 0 && <span className="nav-count-badge">{unclaimedAchievementCount > 99 ? '99+' : unclaimedAchievementCount}</span>}</button><button className={goldRankingOpen?'active':''} onClick={()=>setGoldRankingOpen(true)}>골드랭킹</button></nav> : <nav aria-label="회원 주요 메뉴"><button className={view==='home'?'active':''} onClick={()=>go('home')}>홈</button><button className={view==='casino'?'active':''} onClick={()=>go('casino')}>카지노</button><button className={view==='sports'?'active':''} onClick={()=>go('sports')}>스포츠</button><button className={view==='mini'?'active':''} onClick={()=>go('mini')}>미니게임</button><button onClick={()=>document.getElementById('events')?.scrollIntoView({behavior:'smooth'})}>이벤트</button><button onClick={()=>setMenuScreen('achievement')}>칭호 업적{unclaimedAchievementCount > 0 && <span className="nav-count-badge">{unclaimedAchievementCount > 99 ? '99+' : unclaimedAchievementCount}</span>}</button></nav>}
-        <div className="head-actions">{(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)?<div className="gold-top-balance"><small>보유 골드</small><b>{goldBalance.toLocaleString()} <em>G</em></b></div>:<div className="member-top-balances"><div className="member-top-balance"><small>보유금</small><b>{credit.toLocaleString()} <em>원</em></b></div><button type="button" className="member-top-balance member-top-point" onClick={()=>setSupportFundOpen(true)} aria-label="보유 지원금 및 사용 안내 확인"><small>지원금</small><b>{supportFund.toLocaleString()} <em>P</em></b></button></div>}<button className="icon-btn badge-btn" onClick={()=>setMenuScreen('messages')} aria-label="쪽지">✉<i>3</i></button><button className="icon-btn notice-btn" onClick={()=>setMenuScreen('notice')} aria-label="공지사항">※</button>{loggedIn?<button className="profile-btn" onClick={()=>setMenuScreen('profile')} aria-label="프로필 마이메뉴"><span aria-label="프로필"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><b>{userNickname}</b></button>:<><button className="login-btn" onClick={()=>setLoginOpen(true)}>로그인</button><button className="join-btn" onClick={()=>setMenuScreen('join')}>회원가입</button></>}</div>
+      <header className={`topbar ${(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)?'':'member-desktop-header'}`}>
+        <button className="brand" onClick={()=>navigate(view==='community'?(loggedIn?'home':'landing'):(goldMode?'gold':'home'))} aria-label={goldMode&&view!=='community'?'꽁게임 홈':'유료회원 홈'}><BrandLogo/>{(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)&&<span className="gold-page-brand">KKONG GAME</span>}</button>
+        {(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view) ? <nav aria-label="꽁게임 주요 메뉴"><button className={view==='gold'?'active':''} onClick={()=>goGold('gold')}>홈</button><button className={view==='goldFlash'?'active':''} onClick={goGoldFlash}>플래시게임</button><button className={view==='goldSports'?'active':''} onClick={()=>goGold('goldSports')}>스포츠</button><button className={view==='goldEvents'?'active':''} onClick={()=>goGold('goldEvents')}>이벤트</button><button className={goldAchievementOpen?'active':''} onClick={()=>setGoldAchievementOpen(true)}>칭호/업적{unclaimedAchievementCount > 0 && <span className="nav-count-badge">{unclaimedAchievementCount > 99 ? '99+' : unclaimedAchievementCount}</span>}</button><button className={goldRankingOpen?'active':''} onClick={()=>setGoldRankingOpen(true)}>골드랭킹</button></nav> : <MemberDesktopNavigation
+          view={view}
+          menuScreen={menuScreen}
+          supportOpen={liveChatOpen}
+          achievementCount={unclaimedAchievementCount}
+          services={serviceMenus}
+          onNavigate={go}
+          onMenu={setMenuScreen}
+          onCommunity={goCommunity}
+          onSupport={handleSupport}
+          onSupportFund={()=>setSupportFundOpen(true)}
+          onBettingHistory={openMemberBetHistory}
+          onBigWheel={()=>loggedIn?navigate('bigwheel'):setLoginOpen(true)}
+        />}
+        <div className="head-actions">{(['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)?<div className="gold-top-balance"><small>보유 골드</small><b>{goldBalance.toLocaleString()} <em>G</em></b></div>:<div className="member-top-balances"><div className="member-top-balance"><small>보유금</small><b>{credit.toLocaleString()} <em>원</em></b></div><button type="button" className="member-top-balance member-top-point" onClick={()=>setSupportFundOpen(true)} aria-label="보유 지원금 및 사용 안내 확인"><small>지원금</small><b>{supportFund.toLocaleString()} <em>P</em></b></button></div>}<button className="icon-btn badge-btn" onClick={()=>setMenuScreen('messages')} aria-label="쪽지">✉<i>3</i></button><button className="icon-btn notice-btn" onClick={()=>setMenuScreen('notice')} aria-label="공지사항">※</button>{loggedIn?((['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)?<button className="profile-btn" onClick={()=>setMenuScreen('profile')} aria-label="프로필 마이메뉴"><span aria-label="프로필"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></span><b>{userNickname}</b></button>:<MemberProfileMenu nickname={userNickname} onHistory={openMemberBetHistory} onProfile={()=>setMenuScreen('profile')}/>):<><button className="login-btn" onClick={()=>setLoginOpen(true)}>로그인</button><button className="join-btn" onClick={()=>setMenuScreen('join')}>회원가입</button></>}</div>
         {noticeOpen&&<div className="notification-pop"><div><b>알림</b><button onClick={()=>setNoticeOpen(false)}>×</button></div>{notices.map(n=><button key={n.title} onClick={()=>setToast(`${n.title} 상세를 확인했습니다.`)}><span>{n.tag}</span><p>{n.title}<small>{n.date}</small></p></button>)}<button className="all-read" onClick={()=>setToast('모든 알림을 읽음 처리했습니다.')}>모두 읽음 처리</button></div>}
       </header>
 
@@ -515,10 +568,11 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
 
       {view==='landing'&&<MoneygroundLanding onLogin={()=>setLoginOpen(true)} onJoin={()=>setSignupOpen(true)} onCommunity={goCommunity} onSupport={handleSupport}/>}
       {view==='community'&&<CommunityPage loggedIn={loggedIn} onGold={()=>goGold('gold')} onToast={setToast}/>} 
+      {view==='bettingHistory'&&<MemberBetHistory records={memberBetHistory} loggedIn={loggedIn} onLogin={()=>setLoginOpen(true)} onBack={()=>go('home')}/>}
 
       {searchOpen&&<section className="search-drawer"><div><span>⌕</span><input autoFocus value={query} onChange={e=>setQuery(e.target.value)} placeholder="게임, 팀, 리그를 검색하세요" aria-label="통합 검색어"/><small>{query.length>1?`${filteredGames.length+filteredMatches.length}개 결과`:'2글자 이상 입력'}</small><button onClick={()=>{setQuery('');setSearchOpen(false)}}>닫기</button></div></section>}
 
-{!(['home','gold','goldSports','goldEvents','goldFlash','mini'] as string[]).includes(view)&&<nav className="service-bar" aria-label="회원 서비스 메뉴"><div>{serviceMenus.map(item=><button onClick={()=>{ if(item.screen==='support') handleSupport(); else setMenuScreen(item.screen); }} key={item.screen}><MenuIcon name={item.screen}/>{item.label}</button>)}<i/><button className="money-status" onClick={()=>setMenuScreen('money')}><small>머니</small><b>{credit.toLocaleString()} 원</b></button><button className="money-status" onClick={()=>setSupportFundOpen(true)}><small>지원금</small><b>{supportFund.toLocaleString()} P</b></button><button className="my-menu" onClick={()=>setMenuScreen('profile')}>MY 메뉴⌄</button></div></nav>}
+{!(['home','gold','goldSports','goldEvents','goldFlash','mini','bettingHistory'] as string[]).includes(view)&&<nav className="service-bar" aria-label="회원 서비스 메뉴"><div>{serviceMenus.map(item=><button onClick={()=>{ if(item.screen==='support') handleSupport(); else setMenuScreen(item.screen); }} key={item.screen}><MenuIcon name={item.screen}/>{item.label}</button>)}<i/><button className="money-status" onClick={()=>setMenuScreen('money')}><small>머니</small><b>{credit.toLocaleString()} 원</b></button><button className="money-status" onClick={()=>setSupportFundOpen(true)}><small>지원금</small><b>{supportFund.toLocaleString()} P</b></button><button className="my-menu" onClick={()=>setMenuScreen('profile')}>MY 메뉴⌄</button></div></nav>}
 
       {view==='gold'&&<>
         <GoldMobileV2
@@ -543,7 +597,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
       {view==='mini'&&(
         !selectedMiniGame
           ? <MiniGameLobby onSelectGame={setSelectedMiniGame} onBack={()=>go('home')}/>
-          : <MemberFlash gameId={selectedMiniGame} onBack={()=>setSelectedMiniGame(null)} onToast={setToast} balance={credit} supportFund={supportFund} onBet={settleMemberBet}/>
+          : <MemberFlash gameId={selectedMiniGame} onBack={()=>setSelectedMiniGame(null)} onToast={notifyBetting} balance={credit} supportFund={supportFund} onBet={settleMemberBet}/>
       )}
 
       {view==='bigwheel'&&<BigWheel initialTier={initialPath?.includes('tier=premium') ? 'premium' : undefined} loggedIn={loggedIn} onLogin={()=>setLoginOpen(true)} onPrize={amt=>{updateCredit(c=>c+amt);setToast(`${amt.toLocaleString()}원 당첨! 보유금에 지급되었습니다.`);}} onBack={()=>go('home')}/>}
@@ -573,7 +627,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
         </section>
       </>}
 
-      {(view==='home'||view==='sports'||view==='gold'||view==='goldSports')&&<section className="content-section sports-section" id="sports"><div className="section-head"><div><span className="kicker">{(view==='gold'||view==='goldSports')?'KKONG GAME SPORTS':'LIVE SPORTS'}</span><h2>{(view==='gold'||view==='goldSports')?'무료 스포츠 게임':view==='sports'?'스포츠 센터':'지금 주목할 경기'}</h2></div>{view==='home'&&<button onClick={()=>go('sports')}>전체 경기 <span>→</span></button>}</div><div className="filter-row">{['전체','축구','야구','농구'].map(x=><button className={sportFilter===x?'active':''} onClick={()=>setSportFilter(x)} key={x}>{x}</button>)}</div><div className="match-layout"><div className="match-list">{filteredMatches.map(m=><article className="match-card" key={m.id}><div className="match-top"><span>{m.sport} · {m.league}</span><b className={m.live?'live':''}>{m.live||m.time}</b><button onClick={()=>setToast('경기 시작 알림을 설정했습니다.')} aria-label="경기 알림">♢</button></div><div className="teams"><strong>{m.home}<small>HOME</small></strong><b>{m.score}</b><strong>{m.away}<small>AWAY</small></strong></div><div className="odds">{m.odds.map(p=>{const selected=bets.some(b=>b.matchId===m.id&&b.pick===p.label);return <button className={selected?'selected':''} onClick={()=>selectBet(m,p)} key={p.label}><small>{p.label}</small><b>{p.value.toFixed(2)}</b></button>})}</div></article>)}</div>{(view==='sports')&&<aside className="desktop-slip"><Slip bets={bets} setBets={setBets} stake={stake} setStake={setStake} totalOdd={totalOdd} expected={expected} credit={credit} limit={limit} onPlace={placeBet} supportFund={supportFund} funding={sportsFunding} onFundingChange={setSportsFunding}/></aside>}</div></section>}
+      {(view==='home'||view==='sports'||view==='gold'||view==='goldSports')&&<section className="content-section sports-section" id="sports"><div className={view==='sports'?'section-head member-sports-heading':'section-head'}><div><span className="kicker">{(view==='gold'||view==='goldSports')?'KKONG GAME SPORTS':'LIVE SPORTS'}</span><h2>{(view==='gold'||view==='goldSports')?'무료 스포츠 게임':view==='sports'?'스포츠 센터':'지금 주목할 경기'}</h2></div>{view==='sports'&&<div className="member-sports-categories" role="group" aria-label="스포츠 구분">{MEMBER_SPORTS_CATEGORIES.map(category=><button type="button" key={category} aria-pressed={sportsCategory===category} onClick={()=>setSportsCategory(category)}>{category}</button>)}</div>}{view==='home'&&<button onClick={()=>go('sports')}>전체 경기 <span>→</span></button>}</div><div className="filter-row">{['전체','축구','야구','농구'].map(x=><button className={sportFilter===x?'active':''} onClick={()=>setSportFilter(x)} key={x}>{x}</button>)}</div><div className="match-layout"><div className="match-list">{view==='sports'&&visibleSportsMatches.length===0&&<p className="member-sports-empty" role="status">선택한 조건에 등록된 경기가 없습니다.</p>}{visibleSportsMatches.map(m=><article className="match-card" key={m.id}><div className="match-top"><span>{m.sport} · {m.league}</span><b className={m.live?'live':''}>{m.live||m.time}</b><button onClick={()=>setToast('경기 시작 알림을 설정했습니다.')} aria-label="경기 알림">♢</button></div><div className="teams"><strong>{m.home}<small>HOME</small></strong><b>{m.score}</b><strong>{m.away}<small>AWAY</small></strong></div><div className="odds">{m.odds.map(p=>{const selected=bets.some(b=>b.matchId===m.id&&b.pick===p.label);return <button className={selected?'selected':''} onClick={()=>selectBet(m,p)} key={p.label}><small>{p.label}</small><b>{p.value.toFixed(2)}</b></button>})}</div></article>)}</div>{(view==='sports')&&<aside className="desktop-slip"><Slip bets={bets} setBets={setBets} stake={stake} setStake={setStake} totalOdd={totalOdd} expected={expected} credit={credit} limit={limit} onPlace={placeBet} supportFund={supportFund} funding={sportsFunding} onFundingChange={setSportsFunding}/></aside>}</div></section>}
 
       {view==='casino'&&<section className="content-section" id="casino"><div className="section-head"><div><span className="kicker">CURATED GAMES</span><h2>카지노 라운지</h2></div></div><div className="filter-row">{['라이브 카지노','슬롯'].map(x=><button className={gameFilter===x?'active':''} onClick={()=>setGameFilter(x)} key={x}>{x}</button>)}</div>{gameFilter==='슬롯'?<SlotLobby onToast={setToast}/>:<div className="game-grid expanded">{filteredGames.map(g=><article className={`game-card ${g.tone} ${g.image?'has-provider-img':''}`} key={g.id} onClick={()=>setToast(`${g.title} 로비를 열었습니다.`)}>{g.image ? <><div className="provider-card-box"><img src={g.image} alt={g.title} loading="lazy"/><div className="play-layer"><button onClick={(e)=>{e.stopPropagation();setToast(`${g.title} 로비를 열었습니다.`);}}><img className="provider-entry-logo" src={`/casino-providers/logos/${g.image.split('/').pop()?.replace(/-(?:portrait-v2|card)\.png$/,'')}.png`} alt="" aria-hidden="true"/>게임 입장</button></div></div><div className="provider-card-caption"><h3>{g.title}</h3></div></> : <><div className="game-visual"><span>{g.icon}</span>{g.badge&&<i>{g.badge}</i>}<button className={favorites.includes(g.id)?'fav':''} onClick={(e)=>{e.stopPropagation();toggleFav(g.id);}} aria-label={`${g.title} 즐겨찾기`}>{favorites.includes(g.id)?'★':'☆'}</button><div className="play-layer"><button onClick={(e)=>{e.stopPropagation();setToast(`${g.title} 로비를 열었습니다.`);}}>게임 입장</button></div></div><div><small>{g.maker}</small><h3>{g.title}</h3><span>{g.category}</span></div></>}</article>)}</div>}</section>}
       {view==='home'&&<section className="content-section lounge-section"><div className="section-head"><div><span className="kicker">PREMIUM LOUNGES</span><h2>프리미엄 게임 라운지</h2></div><button onClick={()=>go('casino')}>전체 라운지 <span>→</span></button></div><div className="lounge-grid">{lounges.map(l=><button key={l.name} className={`lounge-card ${l.tone}`} onClick={()=>go(l.tone==='blue'?'sports':'casino')}><span>{l.mark}</span><div><b>{l.name}</b><small>{l.caption}</small></div><i>→</i></button>)}</div></section>}
@@ -582,7 +636,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
 
       <footer><div className="footer-brand"><BrandLogo compact/></div><p>머니그라운드 회원 서비스 · 안전하고 편안한 이용 환경을 제공합니다.</p><button onClick={()=>setManageOpen(true)}>책임 있는 이용 · 이용 관리</button></footer>
 
-      {(!!bets.length&&view!=='sports'&&!(['gold','goldSports'] as string[]).includes(view))&&<button className="slip-bar" onClick={()=>setSlipOpen(true)}><span><b>{bets.length}</b> 베팅슬립</span><strong>총 배당 {totalOdd.toFixed(2)} <i>⌃</i></strong></button>}
+      {(!!bets.length&&view!=='sports'&&view!=='bettingHistory'&&!(['gold','goldSports'] as string[]).includes(view))&&<button className="slip-bar" onClick={()=>setSlipOpen(true)}><span><b>{bets.length}</b> 베팅슬립</span><strong>총 배당 {totalOdd.toFixed(2)} <i>⌃</i></strong></button>}
       {((['gold','goldSports','sports'] as string[]).includes(view) && !slipOpen) && (
         <button
           className={`gold-slip-icon sports-slip-icon ${bets.length ? 'has-bets' : ''}`}
@@ -594,7 +648,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
           <small>베팅슬립</small>
         </button>
       )}
-      {slipOpen&&<div className="sheet-backdrop" onClick={()=>setSlipOpen(false)}><div className="bet-sheet" onClick={e=>e.stopPropagation()}><button className="sheet-close" onClick={()=>setSlipOpen(false)}>×</button><Slip bets={bets} setBets={setBets} stake={stake} setStake={setStake} totalOdd={totalOdd} expected={expected} credit={credit} limit={limit} onPlace={placeBet} supportFund={supportFund} funding={sportsFunding} onFundingChange={setSportsFunding} gold={(['gold','goldSports'] as string[]).includes(view)}/></div></div>}
+      {slipOpen&&view!=='bettingHistory'&&<div className="sheet-backdrop" onClick={()=>setSlipOpen(false)}><div className="bet-sheet" onClick={e=>e.stopPropagation()}><button className="sheet-close" onClick={()=>setSlipOpen(false)}>×</button><Slip bets={bets} setBets={setBets} stake={stake} setStake={setStake} totalOdd={totalOdd} expected={expected} credit={credit} limit={limit} onPlace={placeBet} supportFund={supportFund} funding={sportsFunding} onFundingChange={setSportsFunding} gold={(['gold','goldSports'] as string[]).includes(view)}/></div></div>}
 
       {((['gold','goldSports','goldEvents','goldFlash'] as string[]).includes(view)||(!loggedIn&&(view==='landing'||view==='community')))
         ? <nav className="mobile-nav gold-mobile-nav gold-v2-global-nav" aria-label="꽁게임 모바일 메뉴">
@@ -648,14 +702,14 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
           window.dispatchEvent(new Event('storage'));
         }catch{}
         setLoginOpen(false);
-        go('home');
+        if(view!=='bettingHistory') go('home');
         setToast('머니그라운드에 로그인했습니다. (룰렛 쿠폰 100장 지급)');
       }} onSignup={()=>{setLoginOpen(false);setSignupOpen(true)}}/>}
       {signupOpen&&<SignupModal onClose={()=>setSignupOpen(false)} onToast={setToast} onComplete={()=>{setSignupOpen(false);setLoggedIn(true);try{window.localStorage.setItem('moneyground_logged_in','true');}catch{}go('home');setToast('회원가입이 완료되었습니다. 로그인되었습니다.');}}/>}
       {liveChatOpen&&<LiveChatModal onClose={()=>setLiveChatOpen(false)}/>}
       {supportFundOpen&&<SupportFundModal amount={supportFund} onClose={()=>setSupportFundOpen(false)} onSupport={handleSupport}/>}
-      {manageOpen&&<Modal title="MY · 이용 관리" onClose={()=>setManageOpen(false)}><div className="manage"><div className="member-card"><span>MG</span><div><b>{userNickname} 님</b><small>MEMBER · 세션 {sessionMinutes}분</small></div><strong>{credit.toLocaleString()} 원</strong></div><h3>책임 있는 이용</h3><label>일일 베팅 한도 <b>{limit.toLocaleString()} 원</b><input type="range" min="500" max="12000" step="500" value={limit} onChange={e=>setLimit(Number(e.target.value))}/></label><div className="manage-grid"><button onClick={()=>setToast('30분 이용 알림을 설정했습니다.')}><span>◷</span><b>시간 알림</b><small>30분마다 안내</small></button><button onClick={()=>setToast('24시간 휴식 모드가 설정되었습니다.')}><span>☾</span><b>잠시 쉬기</b><small>24시간 차단</small></button><button onClick={()=>setToast('즐겨찾기 목록을 확인했습니다.')}><span>★</span><b>즐겨찾기</b><small>{favorites.length}개 게임</small></button><button onClick={()=>setToast('활동 내역을 확인했습니다.')}><span>▤</span><b>활동 내역</b><small>최근 30일</small></button></div><button className="logout" onClick={()=>{setLoggedIn(false);try{window.localStorage.removeItem('moneyground_logged_in');}catch{}setManageOpen(false);navigate('landing');setToast('로그아웃했습니다.');}}>로그아웃</button></div></Modal>}
-      {menuScreen&&<MenuCenter initial={menuScreen} onClose={()=>setMenuScreen(null)} onToast={setToast} credit={credit} onUpdateCredit={updateCredit} userNickname={userNickname} bets={bets} memberLevel={memberPlayer.level} equippedTitle={equippedTitle} equippedBadge={equippedBadge} equippedGrade={equippedGrade} onEquipTitle={(t,b,g)=>updateEquippedTitle(t,b,g)} onUpdateNickname={name=>{setUserNickname(name);try{window.localStorage.setItem('moneyground_user_nickname',name);}catch{}}} onLogout={()=>{setLoggedIn(false);try{window.localStorage.removeItem('moneyground_logged_in');}catch{}setMenuScreen(null);setManageOpen(false);navigate('landing');setToast('로그아웃했습니다.');}}/>}
+      {manageOpen&&<Modal title="MY · 이용 관리" onClose={()=>setManageOpen(false)}><div className="manage"><div className="member-card"><span>MG</span><div><b>{userNickname} 님</b><small>MEMBER · 세션 {sessionMinutes}분</small></div><strong>{credit.toLocaleString()} 원</strong></div><h3>책임 있는 이용</h3><label>일일 베팅 한도 <b>{limit.toLocaleString()} 원</b><input type="range" min="500" max="12000" step="500" value={limit} onChange={e=>setLimit(Number(e.target.value))}/></label><div className="manage-grid"><button onClick={()=>setToast('30분 이용 알림을 설정했습니다.')}><span>◷</span><b>시간 알림</b><small>30분마다 안내</small></button><button onClick={()=>setToast('24시간 휴식 모드가 설정되었습니다.')}><span>☾</span><b>잠시 쉬기</b><small>24시간 차단</small></button><button onClick={()=>setToast('즐겨찾기 목록을 확인했습니다.')}><span>★</span><b>즐겨찾기</b><small>{favorites.length}개 게임</small></button><button onClick={()=>setToast('활동 내역을 확인했습니다.')}><span>▤</span><b>활동 내역</b><small>최근 30일</small></button></div><button className="logout" onClick={()=>{setLoggedIn(false);setMemberBetHistory([]);try{window.localStorage.removeItem('moneyground_logged_in');}catch{}setManageOpen(false);navigate('landing');setToast('로그아웃했습니다.');}}>로그아웃</button></div></Modal>}
+      {menuScreen&&<MenuCenter initial={menuScreen} onClose={()=>setMenuScreen(null)} onToast={setToast} credit={credit} onUpdateCredit={updateCredit} userNickname={userNickname} bets={bets} memberLevel={memberPlayer.level} equippedTitle={equippedTitle} equippedBadge={equippedBadge} equippedGrade={equippedGrade} onEquipTitle={(t,b,g)=>updateEquippedTitle(t,b,g)} onUpdateNickname={name=>{setUserNickname(name);try{window.localStorage.setItem('moneyground_user_nickname',name);}catch{}}} onLogout={()=>{setLoggedIn(false);setMemberBetHistory([]);try{window.localStorage.removeItem('moneyground_logged_in');}catch{}setMenuScreen(null);setManageOpen(false);navigate('landing');setToast('로그아웃했습니다.');}}/>}
       {goldAchievementOpen&&<GoldAchievement balance={goldBalance} level={goldPlayer?.level??1} onClose={()=>setGoldAchievementOpen(false)} onRefill={refillGold}/>}
       {goldRankingOpen&&<GoldRanking credit={goldBalance} totalBetting={goldPlayer?.totalBetting??0} onClose={()=>setGoldRankingOpen(false)}/>}
       {goldRewardClaimOpen&&<GoldRewardClaim count={goldPlayer?.pendingRewards??0} onClose={()=>setGoldRewardClaimOpen(false)} onClaim={async()=>{await claimGoldRewards();setGoldRewardClaimOpen(false)}}/>}
@@ -710,20 +764,22 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
         </aside>
       )}
       {isHomeScreen&&!modalActive&&<BigWheelLaunch onOpen={()=>loggedIn?navigate('bigwheel'):setLoginOpen(true)}/>}
-      {toast&&<div className="toast" role="status"><span>✓</span>{toast}<button onClick={()=>setToast('')}>×</button></div>}
+      {toast&&(memberFeedback
+        ? <div key={memberFeedbackId} className="toast member-feedback-toast" role="status" aria-live="polite" aria-atomic="true"><span aria-hidden="true">{toast.startsWith('배팅이 완료되었습니다.')?'✓':'i'}</span><div className="member-feedback-message">{toast}</div><button type="button" aria-label="알림 닫기" onClick={()=>setToast('')}>×</button></div>
+        : <div className="toast" role="status"><span>✓</span>{toast}<button onClick={()=>setToast('')}>×</button></div>)}
     </main>
   );
 }
 
 function MoneygroundLanding({onLogin,onJoin,onCommunity,onSupport}:{onLogin:()=>void;onJoin:()=>void;onCommunity:()=>void;onSupport:()=>void}){
   const slides=[
-    {image:'/landing-reward-slide-user.png',alt:'배팅 게이지 100% 달성 시 보상 지급 안내'},
+    {image:'/landing-reward-slide-emerald-v2.png',alt:'배팅 게이지 100% 달성 시 보상 지급 안내'},
     {image:'/landing-reward-slide-2.png',eyebrow:'REWARD GAUGE',title:'배팅할수록\n보상이 가까워집니다',detail:'게이지 100% 달성 시 즉시 보상 지급'},
     {image:'/landing-reward-slide-3.png',eyebrow:'LEVEL UP REWARD',title:'레벨업마다\n쌓이는 특별 보상',detail:'쿠폰 · 골드 · 다양한 혜택을 한 번에'}
   ];
   const [slide,setSlide]=useState(0);
   useEffect(()=>{const timer=window.setInterval(()=>setSlide(current=>(current+1)%slides.length),4000);return()=>window.clearInterval(timer)},[]);
-  return <section className="landing-reference" aria-label="머니그라운드 시작 페이지"><img src="/landing-page-reference.png" alt="머니그라운드 보상 게이지와 업적 리워드 안내"/><section className="landing-reward-hero" aria-label="보상 안내 이미지 슬라이드">{slides.map((item,index)=><article key={item.image} className={`landing-reward-slide ${slide===index?'active':''}`} aria-hidden={slide!==index}><img src={item.image} alt={item.alt??''}/>{item.title&&<div className="landing-reward-slide-copy"><span>{item.eyebrow}</span><b>{item.title.split('\n').map((line,i)=><>{i>0&&<br/>}{line}</>)}</b><small>{item.detail}</small></div>}</article>)}</section><img className="landing-achievement-rewards-image" src="/landing-achievement-rewards.png" alt="머니그라운드 업적 리워드: 슬롯스핀, 첫 입금, 첫 배팅, 스포츠 적중 등 8개 뱃지"/><button className="landing-auth-action login" onClick={onLogin}>로그인</button><button className="landing-auth-action join" onClick={onJoin}>회원가입</button><button className="landing-reward-claim-hotspot" onClick={onLogin} aria-label="보상 받기 로그인 또는 회원가입"/></section>;
+  return <section className="landing-reference" aria-label="머니그라운드 시작 페이지"><img src="/landing-page-emerald-v2.png" alt="머니그라운드 보상 게이지와 업적 리워드 안내"/><section className="landing-reward-hero" aria-label="보상 안내 이미지 슬라이드">{slides.map((item,index)=><article key={item.image} className={`landing-reward-slide ${slide===index?'active':''}`} aria-hidden={slide!==index}><img src={item.image} alt={item.alt??''}/>{item.title&&<div className="landing-reward-slide-copy"><span>{item.eyebrow}</span><b>{item.title.split('\n').map((line,i)=><>{i>0&&<br/>}{line}</>)}</b><small>{item.detail}</small></div>}</article>)}</section><MemberLandingAchievements onClaim={onLogin}/><button className="landing-auth-action login" onClick={onLogin}>로그인</button><button className="landing-auth-action join" onClick={onJoin}>회원가입</button></section>;
 }
 
 function LandingIntro({onDone}:{onDone:(disableNextTime:boolean)=>void}){
@@ -1499,14 +1555,7 @@ function MemberFlash({
     gameId === 'baccarat-1' ||
     gameId === 'baccarat-2' ||
     gameId === 'lotus-baccarat';
-  const gameTitle =
-    gameId === 'baccarat-1'
-      ? '바카라1'
-      : gameId === 'baccarat-2'
-      ? '바카라2'
-      : gameId === 'lotus-baccarat'
-      ? '로투스 바카라'
-      : '로투스 홀짝';
+  const gameTitle = memberMiniGameTitle(gameId);
   const gameKind: 'oddeven' | 'baccarat' = isBaccarat ? 'baccarat' : 'oddeven';
 
   const [pick, setPick] = useState<string | null>(null);
@@ -1542,6 +1591,7 @@ function MemberFlash({
     rollingRef.current=true;
     setRolling(true);
     setResult(null);
+    onToast('배팅을 처리하고 있습니다…');
     window.setTimeout(async () => {
       try {
         const outcome = await onBet(amount, pick, gameKind, funding);
@@ -1555,13 +1605,13 @@ function MemberFlash({
           else if (outcome.resultPick === '타이') winMult = 8.0;
           const winAmount = Math.floor(amount * winMult);
           onToast(
-            `🎉 ${outcome.resultPick} 당첨! ${winAmount.toLocaleString()}${unit} 획득! (VIP 게이지 +${amount.toLocaleString()}원 적립${
+            `배팅이 완료되었습니다.\n🎉 ${outcome.resultPick} 당첨! ${winAmount.toLocaleString()}${unit} 획득! (VIP 게이지 +${amount.toLocaleString()}원 적립${
               outcome.leveledUp ? ' · 레벨 업!' : ''
             })`
           );
         } else {
           onToast(
-            `${outcome.resultPick} 결과 · 낙첨되었습니다. (VIP 게이지 +${amount.toLocaleString()}원 적립${
+            `배팅이 완료되었습니다.\n${outcome.resultPick} 결과 · 낙첨되었습니다. (VIP 게이지 +${amount.toLocaleString()}원 적립${
               outcome.leveledUp ? ' · 레벨 업!' : ''
             })`
           );

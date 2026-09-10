@@ -1,0 +1,21 @@
+.member-profile-dialog {
+  width: min(340px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  margin: auto;
+  padding: 0;
+  color: #effffb;
+  background: #091c1a;
+  border: 1px solid #256056;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px #0009;
+}
+.member-profile-dialog::backdrop { background: #000a; backdrop-filter: blur(4px); }
+.member-profile-dialog .member-profile-dialog-content { padding: 20px; }
+.member-profile-dialog header { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.member-profile-dialog h2 { margin: 0; font-size: 21px; }
+.member-profile-dialog p { margin: 0 0 20px; color: #b5d1cb; font-size: 14px; overflow-wrap: anywhere; }
+.member-profile-dialog .member-profile-dialog-content button { color: #effffb; min-height: 44px; border: 1px solid #27584f; background: #102c27; border-radius: 10px; font-size: 16px; }
+.member-profile-dialog header button { width: 44px; padding: 0; font-size: 26px !important; }
+.member-profile-dialog .member-profile-link { display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 12px; margin-top: 10px; padding: 15px 16px; text-align: left; }
+.member-profile-dialog .member-profile-link span:last-child { color: #3ce3ca; }
+.member-profile-dialog button:focus-visible { outline: 2px solid #40edd2; outline-offset: 3px; }

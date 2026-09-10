@@ -1269,7 +1269,6 @@ main:not(.landing-view) {
     aspect-ratio: 784 / 300 !important;
   }
 }
-.landing-reference>img.landing-achievement-rewards-image{--achievement-top:max(calc(45.5% + 20px),calc(22.4% + 28px + 37.037cqw));position:absolute;z-index:3;top:var(--achievement-top);left:0;display:block;width:100%!important;height:38%!important;object-fit:fill!important;pointer-events:none}
 
 /* Member Mini Game Lobby (목록 페이지) */
 .mini-game-lobby {
