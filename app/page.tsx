@@ -104,7 +104,7 @@ const lounges = [
 const serviceMenus: {screen:MenuScreen;label:string;icon:string}[] = [
   {screen:'deposit',label:'입금신청',icon:'●'}, {screen:'withdraw',label:'출금신청',icon:'▰'},
   {screen:'events',label:'이벤트',icon:'▣'}, {screen:'notice',label:'공지/규정',icon:'▤'},
-  {screen:'referral',label:'지인추천',icon:'♧'}, {screen:'attendance',label:'출석부',icon:'▦'},
+  {screen:'referral',label:'지인추천',icon:'♧'}, {screen:'attendance',label:'출석부 룰렛',icon:'▦'},
   {screen:'achievement',label:'칭호 업적',icon:'♛'}, {screen:'coupon',label:'쿠폰',icon:'▥'}, {screen:'support',label:'고객센터',icon:'▧'},
   {screen:'messages',label:'쪽지',icon:'✉'},
 ];
@@ -614,10 +614,9 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
           onSports={()=>go('sports')}
           onSlots={()=>{go('casino');setGameFilter('슬롯');}}
           onMini={()=>go('mini')}
-          onVirtual={()=>setToast('가상게임 라운지에 입장합니다.')}
           onEvents={()=>setMenuScreen('events')}
-          onDeposit={()=>setMenuScreen('deposit')}
-          onWithdraw={()=>setMenuScreen('withdraw')}
+          onFinance={()=>setMenuScreen('deposit')}
+          onAttendance={()=>setMenuScreen('attendance')}
           onSupport={handleSupport}
           onProfile={()=>setMenuScreen('achievement')}
           onMoney={()=>setMenuScreen('money')}
@@ -634,7 +633,7 @@ export default function Home({initialPath='/'}:{initialPath?:string}) {
 
       {view==='home'&&<><section className="promo-grid" id="events"><article className="promo emerald"><span>MEMBER BENEFIT 01</span><h3>아이콘 솔루션</h3><p>검증된 솔루션과 안정적인 플레이 환경</p><button onClick={()=>setToast('솔루션 안내를 확인했습니다.')}>자세히 보기 →</button></article><article className="promo gold"><span>MEMBER BENEFIT 02</span><h3>프리미엄 라이브</h3><p>라이브 테이블의 생생한 인터페이스를 경험하세요</p><button onClick={()=>go('casino')}>게임 보기 →</button></article><article className="promo violet"><span>MEMBER BENEFIT 03</span><h3>스포츠 센터</h3><p>팀과 리그를 빠르게 찾고 픽을 구성하세요</p><button onClick={()=>go('sports')}>경기 보기 →</button></article></section><section className="info-section"><div><span className="kicker">NOTICE</span><h2>새로운 소식</h2></div><div className="notice-list">{notices.map(n=><button key={n.title} onClick={()=>setToast(n.title)}><span>{n.tag}</span><b>{n.title}</b><time>{n.date}</time><i>→</i></button>)}</div></section></>}
 
-      <footer><div className="footer-brand"><BrandLogo compact/></div><p>머니그라운드 회원 서비스 · 안전하고 편안한 이용 환경을 제공합니다.</p><button onClick={()=>setManageOpen(true)}>책임 있는 이용 · 이용 관리</button></footer>
+      <footer><div className="footer-brand"><BrandLogo compact/></div><p>머니그라운드 회원 서비스 · 안전하고 편안한 이용 환경을 제공합니다.</p></footer>
 
       {(!!bets.length&&view!=='sports'&&view!=='bettingHistory'&&!(['gold','goldSports'] as string[]).includes(view))&&<button className="slip-bar" onClick={()=>setSlipOpen(true)}><span><b>{bets.length}</b> 베팅슬립</span><strong>총 배당 {totalOdd.toFixed(2)} <i>⌃</i></strong></button>}
       {((['gold','goldSports','sports'] as string[]).includes(view) && !slipOpen) && (
@@ -1909,16 +1908,16 @@ function MemberGlobalProgress({
   );
 }
 
-function MemberMobileV2({balance,userNickname,equippedTitle='루키',equippedBadge='/badges/badge-1.png',equippedGrade='일반',unclaimedCount=0,onCasino,onSports,onSlots,onMini,onVirtual,onEvents,onDeposit,onWithdraw,onSupport,onProfile,onMoney}:{balance:number;userNickname?:string;equippedTitle?:string;equippedBadge?:string;equippedGrade?:string;unclaimedCount?:number;onCasino:()=>void;onSports:()=>void;onSlots:()=>void;onMini:()=>void;onVirtual:()=>void;onEvents:()=>void;onDeposit:()=>void;onWithdraw:()=>void;onSupport:()=>void;onProfile:()=>void;onMoney:()=>void}){
+function MemberMobileV2({balance,userNickname,equippedTitle='루키',equippedBadge='/badges/badge-1.png',equippedGrade='일반',unclaimedCount=0,onCasino,onSports,onSlots,onMini,onEvents,onFinance,onAttendance,onSupport,onProfile,onMoney}:{balance:number;userNickname?:string;equippedTitle?:string;equippedBadge?:string;equippedGrade?:string;unclaimedCount?:number;onCasino:()=>void;onSports:()=>void;onSlots:()=>void;onMini:()=>void;onEvents:()=>void;onFinance:()=>void;onAttendance:()=>void;onSupport:()=>void;onProfile:()=>void;onMoney:()=>void}){
   const tiles=[
-    {kind:'refill',label:'입금신청',sub:'안전 가상계좌',action:onDeposit},
-    {kind:'honor',label:'출금신청',sub:'3분 초고속 환전',action:onWithdraw},
+    {kind:'finance',label:'입출금 신청',sub:'입금·출금 신청',action:onFinance},
+    {kind:'money',label:'머니내역',sub:'보유금·이용 내역',action:onMoney},
     {kind:'friends',label:'고객센터',sub:'24시간 1:1 상담',action:onSupport},
     {kind:'casino',label:'카지노',sub:'라이브 바카라·룰렛',action:onCasino},
     {kind:'sports',label:'스포츠',sub:'국내·해외 실시간',action:onSports},
     {kind:'slots',label:'슬롯',sub:'정품 잭팟 게임',action:onSlots},
-    {kind:'mini',label:'미니게임',sub:'빠른 승부 라운지',action:onMini},
-    {kind:'rank',label:'가상게임',sub:'축구·경마·농구',action:onVirtual},
+    {kind:'mini',label:'미니게임&가상게임',sub:'게임 라운지',action:onMini},
+    {kind:'attendance',label:'출석부 룰렛',sub:'10일 출석 후 스핀',action:onAttendance},
     {kind:'gift',label:'이벤트',sub:'충전 & 첫입금 혜택',action:onEvents},
   ];
   return (
@@ -1946,9 +1945,9 @@ function MemberMobileV2({balance,userNickname,equippedTitle='루키',equippedBad
       <MemberIntroSlider/>
       <section className="member-v2-grid" aria-label="회원 전용 게임 메뉴">
         {tiles.map(tile=>(
-          <button className={`member-v2-tile ${tile.kind}`} key={tile.label} onClick={tile.action}>
+          <button className={`member-v2-tile ${tile.kind}`} key={tile.label} aria-label={tile.label} onClick={tile.action}>
             <div>
-              <b>{tile.label}</b>
+              <b>{tile.kind==='mini'?<>미니게임&amp;<wbr/>가상게임</>:tile.label}</b>
               <small>{tile.sub}</small>
             </div>
           </button>

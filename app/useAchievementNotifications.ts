@@ -76,7 +76,7 @@ export function useAchievementNotifications() {
         type: 'achievement',
         title: '첫 배팅 적중!',
         desc: '머니그라운드 첫 승리 달성',
-        reward: '+10,000P',
+        reward: mode === 'member' ? '전용 뱃지 & 칭호' : '+10,000P',
         badge: '/badges/badge-1.png',
         grade: '일반',
       });
@@ -90,7 +90,7 @@ export function useAchievementNotifications() {
         type: 'achievement',
         title: '미니게임 3연승 달성!',
         desc: '미니게임 연속 3승 질주',
-        reward: '칭호 【직관의 승부사】 · +10,000P',
+        reward: mode === 'member' ? '전용 뱃지 & 칭호 【직관의 승부사】' : '칭호 【직관의 승부사】 · +10,000P',
         badge: '/badges/badge-1.png',
         grade: '일반',
       });
@@ -104,7 +104,7 @@ export function useAchievementNotifications() {
         type: 'achievement',
         title: '미니게임 5연승 달성!',
         desc: '미니게임 연속 5승 질주',
-        reward: '칭호 【예측의 달인】 · +30,000P',
+        reward: mode === 'member' ? '전용 뱃지 & 칭호 【예측의 달인】' : '칭호 【예측의 달인】 · +30,000P',
         badge: '/badges/badge-9.png',
         grade: '레어',
       });
@@ -118,7 +118,7 @@ export function useAchievementNotifications() {
         type: 'achievement',
         title: '미니게임 7연승 달성!',
         desc: '미니게임 연속 7승 대기록',
-        reward: '칭호 【확률의 지배자】 · +100,000P',
+        reward: mode === 'member' ? '전용 뱃지 & 칭호 【확률의 지배자】' : '칭호 【확률의 지배자】 · +100,000P',
         badge: '/badges/badge-12.png',
         grade: '전설',
       });
@@ -132,7 +132,7 @@ export function useAchievementNotifications() {
         type: 'achievement',
         title: '미니게임 10연승 무패 신화 달성!',
         desc: '미니게임 10연승 무패 신화 등극',
-        reward: '칭호 【미니게임 황제】 · +300,000P',
+        reward: mode === 'member' ? '전용 뱃지 & 칭호 【미니게임 황제】' : '칭호 【미니게임 황제】 · +300,000P',
         badge: '/badges/badge-3.png',
         grade: '신화',
       });
@@ -146,7 +146,7 @@ export function useAchievementNotifications() {
         type: 'quest',
         title: '게임 플레이 3회 완료!',
         desc: '카지노/슬롯/미니게임 중 3회 플레이 완료',
-        reward: '3,000P + 30 경험치 획득!',
+        reward: mode === 'member' ? undefined : '3,000P + 30 경험치 획득!',
         icon: '🎲',
       });
     }

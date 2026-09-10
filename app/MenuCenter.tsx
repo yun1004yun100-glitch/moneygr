@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { BrandLogo } from './BrandLogo';
+import { AttendanceRoulette } from './AttendanceRoulette';
+import { MemberMoneyHistory as Money } from './MemberMoneyHistory';
 import { resolveBadgeAsset } from './badge-assets';
 import { MenuIcon } from './MenuIcon';
 import { MemberAchievementJourney } from './MemberAchievementJourney';
@@ -30,7 +32,7 @@ export type MenuScreen =
 
 const titles: Record<MenuScreen,string> = {
   deposit:'입금신청', withdraw:'출금신청', coupon:'쿠폰', events:'이벤트', notice:'공지사항',
-  support:'고객센터', messages:'쪽지', attendance:'출석부', referral:'지인추천', point:'포인트 전환',
+  support:'고객센터', messages:'쪽지', attendance:'출석부 룰렛', referral:'지인추천', point:'포인트 전환',
   achievement:'칭호 업적', money:'머니내역', password:'비밀번호 변경', profile:'개인정보수정', staff:'담당자 연결', join:'회원가입',
 };
 
@@ -49,7 +51,6 @@ export function MenuCenter({initial,onClose,onToast,credit,onUpdateCredit,onLogo
   const [couponTab,setCouponTab]=useState<'plus'|'free'|'history'>('plus');
   const [messageOpen,setMessageOpen]=useState(false);
   const [historyOpen,setHistoryOpen]=useState(false);
-  const [month,setMonth]=useState(4);
 
   useEffect(()=>{const key=(e:KeyboardEvent)=>{if(e.key==='Escape')onClose()};window.addEventListener('keydown',key);document.body.style.overflow='hidden';return()=>{window.removeEventListener('keydown',key);document.body.style.overflow=''}},[onClose]);
   useEffect(()=>{setDetail(null);setMessageOpen(false);setHistoryOpen(false)},[screen]);
@@ -73,11 +74,11 @@ export function MenuCenter({initial,onClose,onToast,credit,onUpdateCredit,onLogo
         {screen==='notice'&&<Notice detail={detail} setDetail={setDetail}/>} 
         {screen==='support'&&<Support onToast={onToast} userNickname={userNickname} bets={bets}/>} 
         {screen==='messages'&&<Messages open={messageOpen} setOpen={setMessageOpen} onToast={onToast}/>} 
-        {screen==='attendance'&&<Attendance month={month} setMonth={setMonth} onToast={onToast}/>} 
+        {screen==='attendance'&&<AttendanceRoulette nickname={userNickname}/>}
         {screen==='referral'&&<Referral onToast={onToast}/>} 
         {screen==='achievement'&&<Achievement onToast={onToast} level={memberLevel} equippedTitle={propTitle} equippedBadge={propBadge} equippedGrade={propGrade} onEquipTitle={onEquipTitle}/>} 
         {screen==='point'&&<Point submit={submit}/>} 
-        {screen==='money'&&<Money/>} 
+        {screen==='money'&&<Money credit={credit}/>}
         {screen==='password'&&<Password submit={submit}/>} 
         {screen==='profile'&&<><Profile onToast={onToast} userNickname={userNickname} onUpdateNickname={onUpdateNickname}/><button type="button" className="logout profile-logout" onClick={onLogout}>로그아웃</button></>}
         {screen==='staff'&&<Staff submit={submit}/>} 
@@ -92,7 +93,6 @@ export const ALL_TITLES_REGISTRY: Record<string, { grade: string; badge: string;
   // 단일 업적 & 퀘스트
   '첫 발걸음': { grade: '일반', badge: '/badges/badge-1.png', desc: '첫 로그인 달성' },
   '모험의 시작': { grade: '일반', badge: '/badges/badge-1.png', desc: '퀘스트 완료 1회 달성' },
-  '버그 헌터': { grade: '일반', badge: '/badges/badge-2.png', desc: '오류 보고 1회 달성' },
   '업적 도전자': { grade: '일반', badge: '/badges/badge-9.png', desc: '업적 3개 달성' },
   '업적 수집가': { grade: '영웅', badge: '/badges/badge-10.png', desc: '업적 5개 달성' },
   '업적 마스터': { grade: '신화', badge: '/badges/badge-3.png', desc: '업적 10개 달성' },
@@ -217,7 +217,7 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
     : 0;
 
   const singleStepNames = [
-    '도전 시작', '첫 로그인', '오류 보고 1회', '업적 3개 달성',
+    '도전 시작', '첫 로그인', '업적 3개 달성',
     '퀘스트 10회', '업적 5개 달성', '퀘스트 30회', '퀘스트 50회',
     '업적 10개 달성', '퀘스트 100회'
   ];
@@ -266,7 +266,6 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
     // 단일 업적 & 퀘스트
     { title: '첫 발걸음', grade: '일반', desc: '첫 로그인 달성', badge: '/badges/badge-1.png', unlocked: isTitleUnlocked('첫 발걸음') },
     { title: '모험의 시작', grade: '일반', desc: '퀘스트 완료 1회 달성', badge: '/badges/badge-1.png', unlocked: isTitleUnlocked('모험의 시작') },
-    { title: '버그 헌터', grade: '일반', desc: '오류 보고 1회 달성', badge: '/badges/badge-2.png', unlocked: isTitleUnlocked('버그 헌터') },
     { title: '업적 도전자', grade: '일반', desc: '업적 3개 달성', badge: '/badges/badge-9.png', unlocked: isTitleUnlocked('업적 도전자') },
     { title: '업적 수집가', grade: '영웅', desc: '업적 5개 달성', badge: '/badges/badge-10.png', unlocked: isTitleUnlocked('업적 수집가') },
     { title: '업적 마스터', grade: '신화', desc: '업적 10개 달성', badge: '/badges/badge-3.png', unlocked: isTitleUnlocked('업적 마스터') },
@@ -358,14 +357,14 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
         type: 'achievement',
         title: `${item.name} 달성!`,
         desc: item.desc,
-        reward: `+${item.rewardPoints.toLocaleString()}P${item.rewardTitle ? ` · 칭호 【${item.rewardTitle}】 획득!` : ''}`,
+        reward: `전용 뱃지 & 칭호${item.rewardTitle ? ` · 【${item.rewardTitle}】 획득!` : ''}`,
         badge: item.badge,
         grade: item.grade,
       });
       if (item.rewardTitle) {
-        onToast(`[${item.name}] 보상 ${item.rewardPoints.toLocaleString()}P 수령! 칭호 【${item.rewardTitle}】 획득!`);
+        onToast(`[${item.name}] 전용 뱃지와 칭호 【${item.rewardTitle}】를 획득했습니다!`);
       } else {
-        onToast(`[${item.name}] 보상 ${item.rewardPoints.toLocaleString()}P를 수령했습니다!`);
+        onToast(`[${item.name}] 전용 뱃지 & 칭호를 획득했습니다!`);
       }
     }
   };
@@ -379,10 +378,9 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
         type: 'quest',
         title: `${q.title} 완료!`,
         desc: q.desc,
-        reward: `${q.reward} 획득!`,
         icon: q.icon,
       });
-      onToast(`[${q.title}] 퀘스트 보상을 수령했습니다!`);
+      onToast(`[${q.title}] 퀘스트 완료를 확인했습니다!`);
     }
   };
 
@@ -496,10 +494,6 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
                 <div className="card-body">
                   <b className="card-name">{q.title}</b>
                   <p className="card-desc">{q.desc}</p>
-                  <div className="card-reward-line">
-                    <span>리워드:</span>
-                    <span className="point-value">{q.reward}</span>
-                  </div>
                   <div className="card-progress-row">
                     <div className="card-progress-bar">
                       <div
@@ -513,7 +507,7 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
                 <div className="card-action">
                   {claimedQuestIds.includes(q.id) ? (
                     <button type="button" className="btn-card-done" disabled>
-                      수령 완료 ✓
+                      완료 확인 ✓
                     </button>
                   ) : isReady ? (
                     <button
@@ -521,7 +515,7 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
                       className="btn-card-claim"
                       onClick={() => handleClaimQuest(q)}
                     >
-                      획득하기
+                      완료하기
                     </button>
                   ) : (
                     <button
@@ -648,8 +642,7 @@ function Achievement({onToast,level,equippedTitle:propTitle,equippedBadge:propBa
                     <p className="card-desc">{item.desc}</p>
                     <div className="card-reward-line">
                       <span>보상:</span>
-                      <span className="point-value">+{item.rewardPoints.toLocaleString()}P</span>
-                      {item.rewardTitle && <span>+ 전용 뱃지 & 칭호</span>}
+                      <span>전용 뱃지 & 칭호</span>
                     </div>
 
                     <div className="card-progress-row">
@@ -771,7 +764,6 @@ function Deposit({amount,setAmount,historyOpen,setHistoryOpen,submit,onToast}:{a
       type: 'quest',
       title: '일일 입금 충전 1회 달성!',
       desc: '오늘 1회 이상 입금 신청 완료',
-      reward: '5,000P + 50 경험치 획득!',
       icon: '💳',
     });
   }
@@ -1548,32 +1540,11 @@ function Messages({open,setOpen,onToast}:{open:boolean;setOpen:(v:boolean)=>void
   return <div><div className="board messages"><div><b>받은시간</b><b>제목</b><b>상태</b></div><button onClick={()=>setOpen(true)}><span>26-08-28 16:42</span><b>회원님, 새로운 미션을 확인하세요.</b><time className="unread">안읽음</time></button><button onClick={()=>setOpen(true)}><span>26-08-27 12:15</span><b>출석 배지가 지급되었습니다.</b><time>읽음</time></button></div>{open&&<section className="message-body"><p>회원님, 오늘의 주간활동 미션이 준비되었습니다. 이벤트 메뉴에서 내용을 확인해주세요.</p></section>}<div className="board-actions"><button onClick={()=>onToast('모든 쪽지를 읽음 처리했습니다.')}>전체읽음</button><button onClick={()=>onToast('쪽지를 전체 삭제했습니다.')}>전체삭제</button></div></div>;
 }
 
-function Attendance({month,setMonth,onToast}:{month:number;setMonth:(n:number)=>void;onToast:(s:string)=>void}){
-  const [done, setDone] = useState<number[]>([1,3,5,6,9,12,14,15,17,18,20,22,23,24,29,30]);
-  const handleCheck = (day: number) => {
-    if (done.includes(day)) {
-      onToast(`${month}월 ${day}일은 이미 출석 완료된 날짜입니다.`);
-    } else {
-      setDone(prev => [...prev, day]);
-      triggerQuestToast({
-        id: 'q-d1',
-        type: 'quest',
-        title: '매일 첫 출석체크 완료!',
-        desc: `${month}월 ${day}일 출석체크 성공!`,
-        reward: '1,000P + 10 경험치 획득!',
-        icon: '📅',
-      });
-      onToast(`${month}월 ${day}일 출석체크 완료! (1,000P 지급)`);
-    }
-  };
-  return <div><div className="calendar-head"><button onClick={()=>setMonth(Math.max(1,month-1))}>‹ 이전</button><h3>2026년 {String(month).padStart(2,'0')}월</h3><button onClick={()=>setMonth(Math.min(12,month+1))}>다음 ›</button></div><div className="calendar"><div className="week">{['월','화','수','목','금','토','일'].map(x=><b key={x}>{x}</b>)}</div><div className="days">{Array.from({length:35},(_,i)=>i<2||i>31?<span key={i}/>:<button className={done.includes(i-1)?'done':''} onClick={()=>handleCheck(i-1)} key={i}><small>{i-1}</small><i>MG</i><b>{done.includes(i-1)?'출석완료':'미출석'}</b></button>)}</div></div></div>;
-}
 
 function Referral({onToast}:{onToast:(s:string)=>void}){return <div><div className="referral-summary"><span>나의 추천 코드</span><strong>MG-GROUND-26</strong><button onClick={()=>onToast('추천 코드를 복사했습니다.')}>코드 복사</button></div><p className="center-copy">현재 총 <b>8명</b>의 지인을 추천했습니다.</p><div className="mc-table compact-table"><div><b>No.</b><b>아이디</b><b>최종 접속일자</b></div>{['abcd3301','ground02','orbit29d','play00dm','wave22'].map((x,i)=><div key={x}><span>{i+1}</span><span>{x}</span><span>26.08.{28-i} 12:32</span></div>)}</div></div>}
 
 function Point({submit}:{submit:(s:string)=>(e:React.FormEvent)=>void}){return <form className="point-box" onSubmit={submit('포인트 5,000 P가 머니로 전환되었습니다.')}><div><small>지원금</small><strong>18,500 <b>P</b></strong></div><span>→</span><div><small>전환 후 머니</small><strong>23,500 <b>원</b></strong></div><label className="mc-field"><span>전환할 포인트</span><input defaultValue="5000"/></label><button>포인트 전환하기</button><p>출석, 미션, 지인추천으로 받은 포인트를 전환할 수 있습니다.</p></form>}
 
-function Money(){return <div><div className="money-summary"><div><small>보유금</small><strong>12,000 원</strong></div><div><small>지원금</small><strong>18,500 P</strong></div><div><small>이번 달 활동</small><strong>24건</strong></div></div><div className="mc-table money-table"><div><b>구분</b><b>내용</b><b>변동</b><b>잔액</b><b>날짜</b></div>{[['베팅','K LEAGUE 픽','-1,000','11,000'],['충전','머니 충전','+1,000','12,000'],['쿠폰','출석 쿠폰 사용','+5,000','11,000'],['당첨','스포츠 결과','+2,500','6,000']].map((x,i)=><div key={i}><span>{x[0]}</span><span>{x[1]}</span><span className={x[2][0]==='+'?'plus':'minus'}>{x[2]} 원</span><span>{x[3]} 원</span><span>08.{28-i}</span></div>)}</div></div>}
 
 function Password({submit}:{submit:(s:string)=>(e:React.FormEvent)=>void}){return <form className="profile-form" onSubmit={submit('비밀번호가 변경되었습니다.')}><label className="mc-field"><span>기존 비밀번호</span><input type="password" required/></label><label className="mc-field"><span>신규 비밀번호</span><input type="password" required placeholder="영문·숫자·특수문자 조합"/></label><label className="mc-field"><span>신규 비밀번호 확인</span><input type="password" required/></label><div className="mc-actions"><button className="danger">변경하기</button><button type="reset">취소</button></div></form>}
 

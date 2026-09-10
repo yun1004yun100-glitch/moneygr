@@ -1070,6 +1070,19 @@ main:not(.landing-view) {
 .member-v2-tile.refill { --tile-art: url('/gold-v2-refill.png'); }
 .member-v2-tile.rank { --tile-art: url('/gold-v2-rank.png'); }
 .member-v2-tile.friends { --tile-art: url('/gold-v2-friends.png'); }
+.member-v2-tile.finance { --tile-art: url('/gold-v2-refill.png'); }
+.member-v2-tile.attendance { --tile-art: url('/member-tile-attendance-v1.png'); }
+.member-v2-tile.money { --tile-art: url('/member-tile-money-history-v1.png'); }
+.member-v2-tile.finance b,
+.member-v2-tile.attendance b,
+.member-v2-tile.mini b {
+  word-break: keep-all;
+  line-height: 1.2;
+}
+.member-v2-tile.mini b,
+.member-v2-tile.attendance b {
+  font-size: clamp(15px, 3.85vw, 19px);
+}
 
 @media (max-width: 680px) {
   body:has(#top:not(.gold-mode)) {
